@@ -197,8 +197,8 @@ class FeedbackFormatter {
 
     if (walletInfo.isNotEmpty) {
       buffer.writeln('   👛 Wallet Information:');
-      walletInfo.forEach((key, value) => buffer.writeln(
-          '      • ${_formatKey(key)}: ${_sanitizeValue(value, truncate: true)}'));
+      walletInfo.forEach((key, value) => buffer
+          .writeln('      • ${_formatKey(key)}: ${_sanitizeValue(value)}'));
       buffer.writeln();
     }
 
@@ -207,15 +207,14 @@ class FeedbackFormatter {
     return buffer.toString();
   }
 
-  /// Formats metadata keys to be more human-readable
+  // Convert camel case to separate words
   static String _formatKey(String key) {
     return key
-        .replaceAll(RegExp(r'([A-Z])'), ' \$1')
-        .split(' ')
-        .map((word) =>
-            word.isEmpty ? word : word[0].toUpperCase() + word.substring(1))
-        .join(' ')
-        .trim();
+        .replaceAllMapped(
+          RegExp(r'([a-z])([A-Z])'),
+          (Match m) => '${m[1]} ${m[2]}',
+        )
+        .replaceAll('_', ' ');
   }
 
   /// Sanitizes values to prevent encoding issues
@@ -226,7 +225,7 @@ class FeedbackFormatter {
 
     // Truncate long values if requested
     if (truncate && stringValue.length > 100) {
-      return '[${stringValue.length} characters]';
+      return '[${stringValue.length} characters (truncated)]';
     }
 
     // Replace control characters and normalize whitespace
@@ -507,8 +506,8 @@ class CloudflareFeedbackProvider implements FeedbackProvider {
       );
 
       // Encode metadata as JSON with proper UTF-8 handling
-      final metadataJson = jsonEncode(metadata);
-      request.fields['metadata'] = utf8.decode(utf8.encode(metadataJson));
+      final metadataJson = metadata.toJsonString();
+      request.fields['metadata'] = metadataJson;
 
       final streamedResponse = await request.send();
       final response = await http.Response.fromStream(streamedResponse);
