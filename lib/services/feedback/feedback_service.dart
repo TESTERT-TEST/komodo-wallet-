@@ -176,29 +176,29 @@ class FeedbackFormatter {
 
     if (appInfo.isNotEmpty) {
       buffer.writeln('   📱 App Information:');
-      appInfo.forEach((key, value) => buffer
-          .writeln('      • ${_formatKey(key)}: ${_sanitizeValue(value)}'));
+      appInfo.forEach(
+          (key, value) => buffer.writeln('      • ${_formatKey(key)}: $value'));
       buffer.writeln();
     }
 
     if (deviceInfo.isNotEmpty) {
       buffer.writeln('   💻 Device Information:');
-      deviceInfo.forEach((key, value) => buffer
-          .writeln('      • ${_formatKey(key)}: ${_sanitizeValue(value)}'));
+      deviceInfo.forEach(
+          (key, value) => buffer.writeln('      • ${_formatKey(key)}: $value'));
       buffer.writeln();
     }
 
     if (buildInfo.isNotEmpty) {
       buffer.writeln('   🔨 Build Information:');
-      buildInfo.forEach((key, value) => buffer
-          .writeln('      • ${_formatKey(key)}: ${_sanitizeValue(value)}'));
+      buildInfo.forEach(
+          (key, value) => buffer.writeln('      • ${_formatKey(key)}: $value'));
       buffer.writeln();
     }
 
     if (walletInfo.isNotEmpty) {
       buffer.writeln('   👛 Wallet Information:');
-      walletInfo.forEach((key, value) => buffer
-          .writeln('      • ${_formatKey(key)}: ${_sanitizeValue(value)}'));
+      walletInfo.forEach(
+          (key, value) => buffer.writeln('      • ${_formatKey(key)}: $value'));
       buffer.writeln();
     }
 
@@ -217,25 +217,7 @@ class FeedbackFormatter {
         .replaceAll('_', ' ');
   }
 
-  /// Sanitizes values to prevent encoding issues
-  static String _sanitizeValue(dynamic value, {bool truncate = false}) {
-    if (value == null) return 'null';
-
-    String stringValue = value.toString();
-
-    // Truncate long values if requested
-    if (truncate && stringValue.length > 100) {
-      return '[${stringValue.length} characters (truncated)]';
-    }
-
-    // Replace control characters and normalize whitespace
-    stringValue = stringValue
-        .replaceAll(RegExp(r'[\x00-\x1F\x7F]'), ' ')
-        .replaceAll(RegExp(r'\s+'), ' ')
-        .trim();
-
-    return stringValue;
-  }
+  // ...existing code...
 }
 
 /// Implementation of FeedbackProvider that submits feedback to Trello
@@ -492,8 +474,8 @@ class CloudflareFeedbackProvider implements FeedbackProvider {
       request.fields.addAll({
         'idBoard': boardId,
         'idList': listId,
-        'name': utf8.decode(utf8.encode('Feedback: $type')),
-        'desc': utf8.decode(utf8.encode(formattedDesc)),
+        'name': 'Feedback: $type',
+        'desc': formattedDesc,
       });
 
       request.files.add(
