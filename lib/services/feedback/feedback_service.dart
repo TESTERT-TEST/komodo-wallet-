@@ -129,21 +129,21 @@ class FeedbackFormatter {
     Map<String, dynamic> metadata,
   ) {
     final buffer = StringBuffer();
-    
+
     // Add the pre-formatted description from the form
     buffer.writeln(description);
     buffer.writeln();
-    
+
     // Technical information section
     buffer.writeln('🔧 TECHNICAL INFORMATION:');
     buffer.writeln('─' * 40);
-    
+
     // Group related metadata for better readability
     final appInfo = <String, dynamic>{};
     final deviceInfo = <String, dynamic>{};
     final buildInfo = <String, dynamic>{};
     final walletInfo = <String, dynamic>{};
-    
+
     for (final entry in metadata.entries) {
       switch (entry.key) {
         case 'contactMethod':
@@ -173,48 +173,69 @@ class FeedbackFormatter {
           deviceInfo[entry.key] = entry.value;
       }
     }
-    
+
     if (appInfo.isNotEmpty) {
       buffer.writeln('   📱 App Information:');
-      appInfo.forEach((key, value) => 
-        buffer.writeln('      • ${_formatKey(key)}: $value'));
+      appInfo.forEach((key, value) => buffer
+          .writeln('      • ${_formatKey(key)}: ${_sanitizeValue(value)}'));
       buffer.writeln();
     }
-    
+
     if (deviceInfo.isNotEmpty) {
       buffer.writeln('   💻 Device Information:');
-      deviceInfo.forEach((key, value) => 
-        buffer.writeln('      • ${_formatKey(key)}: $value'));
+      deviceInfo.forEach((key, value) => buffer
+          .writeln('      • ${_formatKey(key)}: ${_sanitizeValue(value)}'));
       buffer.writeln();
     }
-    
+
     if (buildInfo.isNotEmpty) {
       buffer.writeln('   🔨 Build Information:');
-      buildInfo.forEach((key, value) => 
-        buffer.writeln('      • ${_formatKey(key)}: $value'));
+      buildInfo.forEach((key, value) => buffer
+          .writeln('      • ${_formatKey(key)}: ${_sanitizeValue(value)}'));
       buffer.writeln();
     }
-    
+
     if (walletInfo.isNotEmpty) {
       buffer.writeln('   👛 Wallet Information:');
-      walletInfo.forEach((key, value) => 
-        buffer.writeln('      • ${_formatKey(key)}: ${value.toString().length > 100 ? '[${value.toString().length} characters]' : value}'));
+      walletInfo.forEach((key, value) => buffer.writeln(
+          '      • ${_formatKey(key)}: ${_sanitizeValue(value, truncate: true)}'));
       buffer.writeln();
     }
-    
+
     buffer.writeln('═══════════════════════════════════════');
-    
+
     return buffer.toString();
   }
-  
+
   /// Formats metadata keys to be more human-readable
   static String _formatKey(String key) {
     return key
         .replaceAll(RegExp(r'([A-Z])'), ' \$1')
         .split(' ')
-        .map((word) => word.isEmpty ? word : word[0].toUpperCase() + word.substring(1))
+        .map((word) =>
+            word.isEmpty ? word : word[0].toUpperCase() + word.substring(1))
         .join(' ')
         .trim();
+  }
+
+  /// Sanitizes values to prevent encoding issues
+  static String _sanitizeValue(dynamic value, {bool truncate = false}) {
+    if (value == null) return 'null';
+
+    String stringValue = value.toString();
+
+    // Truncate long values if requested
+    if (truncate && stringValue.length > 100) {
+      return '[${stringValue.length} characters]';
+    }
+
+    // Replace control characters and normalize whitespace
+    stringValue = stringValue
+        .replaceAll(RegExp(r'[\x00-\x1F\x7F]'), ' ')
+        .replaceAll(RegExp(r'\s+'), ' ')
+        .trim();
+
+    return stringValue;
   }
 }
 
@@ -319,7 +340,7 @@ class TrelloFeedbackProvider implements FeedbackProvider {
       // 1. Create the card
       final cardResponse = await http.post(
         Uri.parse('https://api.trello.com/1/cards'),
-        headers: {'Content-Type': 'application/json'},
+        headers: {'Content-Type': 'application/json; charset=utf-8'},
         body: jsonEncode({
           'idList': listId,
           'key': apiKey,
@@ -350,6 +371,7 @@ class TrelloFeedbackProvider implements FeedbackProvider {
           'file',
           screenshot,
           filename: 'screenshot.png',
+          contentType: MediaType('image', 'png'),
         ),
       );
 
@@ -461,13 +483,18 @@ class CloudflareFeedbackProvider implements FeedbackProvider {
 
       final request = http.MultipartRequest('POST', Uri.parse(_endpoint));
 
-      request.headers.addAll({'X-KW-KEY': apiKey});
+      // Set headers including charset
+      request.headers.addAll({
+        'X-KW-KEY': apiKey,
+        'Accept-Charset': 'utf-8',
+      });
 
+      // Properly encode all string fields to ensure UTF-8 encoding
       request.fields.addAll({
         'idBoard': boardId,
         'idList': listId,
-        'name': 'Feedback: $type',
-        'desc': formattedDesc,
+        'name': utf8.decode(utf8.encode('Feedback: $type')),
+        'desc': utf8.decode(utf8.encode(formattedDesc)),
       });
 
       request.files.add(
@@ -479,7 +506,9 @@ class CloudflareFeedbackProvider implements FeedbackProvider {
         ),
       );
 
-      request.fields['metadata'] = jsonEncode(metadata);
+      // Encode metadata as JSON with proper UTF-8 handling
+      final metadataJson = jsonEncode(metadata);
+      request.fields['metadata'] = utf8.decode(utf8.encode(metadataJson));
 
       final streamedResponse = await request.send();
       final response = await http.Response.fromStream(streamedResponse);
