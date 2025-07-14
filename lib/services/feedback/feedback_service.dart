@@ -78,10 +78,8 @@ class FeedbackService {
       'mode': buildMode,
       'timestamp': DateTime.now().toIso8601String(),
 
-      'wallet': (await GetIt.I<KomodoDefiSdk>().auth.currentUser)
-              ?.toJson()
-              .toJsonString() ??
-          'none'
+      'wallet':
+          (await GetIt.I<KomodoDefiSdk>().auth.currentUser)?.toJson() ?? 'None'
     };
 
     try {
