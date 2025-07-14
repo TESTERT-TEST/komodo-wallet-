@@ -14,6 +14,7 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:web_dex/app_config/app_config.dart';
 
 import 'package:web_dex/generated/codegen_loader.g.dart';
+import 'package:web_dex/shared/utils/extensions/string_extensions.dart';
 
 /// Service that handles user feedback submission
 class FeedbackService {
@@ -212,7 +213,8 @@ class FeedbackFormatter {
           RegExp(r'([a-z])([A-Z])'),
           (Match m) => '${m[1]} ${m[2]}',
         )
-        .replaceAll('_', ' ');
+        .replaceAll('_', ' ')
+        .toCapitalize();
   }
 
   // ...existing code...
