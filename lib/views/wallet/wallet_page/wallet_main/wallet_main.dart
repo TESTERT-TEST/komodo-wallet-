@@ -276,7 +276,7 @@ class _WalletMainState extends State<WalletMain> with TickerProviderStateMixin {
   void _onAssetStatisticsTap(AssetId assetId, Duration period) {
     context.read<PriceChartBloc>().add(
           PriceChartStarted(
-            symbols: [assetId.symbol.configSymbol],
+            symbols: [assetId.symbol.assetConfigId],
             period: period,
           ),
         );
