@@ -19,12 +19,14 @@ class WalletLogIn extends StatefulWidget {
     required this.wallet,
     required this.onLogin,
     required this.onCancel,
+    this.initialHdMode = true,
     super.key,
   });
 
   final Wallet wallet;
   final void Function(String, Wallet) onLogin;
   final void Function() onCancel;
+  final bool initialHdMode;
 
   @override
   State<WalletLogIn> createState() => _WalletLogInState();
@@ -33,12 +35,13 @@ class WalletLogIn extends StatefulWidget {
 class _WalletLogInState extends State<WalletLogIn> {
   final _backKeyButton = GlobalKey();
   final TextEditingController _passwordController = TextEditingController();
-  bool _isHdMode = true;
+  late bool _isHdMode;
   KdfUser? _user;
 
   @override
   void initState() {
     super.initState();
+    _isHdMode = widget.initialHdMode;
     unawaited(_fetchKdfUser());
   }
 
