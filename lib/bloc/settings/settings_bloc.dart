@@ -63,7 +63,8 @@ class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
     Emitter<SettingsState> emitter,
   ) async {
     await _settingsRepo.updateSettings(
-      _storedSettings.copyWith(weakPasswordsAllowed: event.weakPasswordsAllowed),
+      _storedSettings.copyWith(
+          weakPasswordsAllowed: event.weakPasswordsAllowed),
     );
     emitter(state.copyWith(weakPasswordsAllowed: event.weakPasswordsAllowed));
   }
