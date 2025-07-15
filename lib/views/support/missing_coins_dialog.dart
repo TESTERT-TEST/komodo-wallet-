@@ -1,13 +1,17 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:app_theme/app_theme.dart';
+
 import 'package:web_dex/app_config/app_config.dart';
 import 'package:web_dex/bloc/auth_bloc/auth_bloc.dart';
 import 'package:web_dex/bloc/coins_bloc/coins_bloc.dart';
 import 'package:web_dex/common/screen.dart';
 import 'package:web_dex/generated/codegen_loader.g.dart';
 import 'package:web_dex/dispatchers/popup_dispatcher.dart';
-import 'package:web_dex/views/wallets_manager/widgets/wallets_manager_wrapper.dart';
+import 'package:web_dex/model/wallet.dart';
+import 'package:web_dex/views/wallets_manager/wallets_manager_events_factory.dart';
+import 'package:web_dex/views/wallets_manager/wallets_manager_wrapper.dart';
 import 'package:web_dex/model/authorize_mode.dart';
 import 'package:web_dex/shared/widgets/html_parser.dart';
 
@@ -50,11 +54,11 @@ Future<void> _signInSingleAddressMode(BuildContext context) async {
       .stream
       .firstWhere((s) => s.mode == AuthorizeMode.noLogin);
   if (!context.mounted) return;
-  final theme = Theme.of(context);
+  final flutterTheme = Theme.of(context);
   PopupDispatcher(
     context: scaffoldKey.currentContext ?? context,
     width: 320,
-    barrierColor: isMobile ? theme.colorScheme.onSurface : null,
+    barrierColor: isMobile ? flutterTheme.colorScheme.onSurface : null,
     borderColor: theme.custom.specificButtonBorderColor,
     popupContent: WalletsManagerWrapper(
       eventType: WalletsManagerEventType.header,
