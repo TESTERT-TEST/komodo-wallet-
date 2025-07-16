@@ -369,28 +369,22 @@ class WithdrawFormBloc extends Bloc<WithdrawFormEvent, WithdrawFormState> {
     WithdrawFormIbcChannelChanged event,
     Emitter<WithdrawFormState> emit,
   ) {
-    final ibcChannelError = _validateIbcChannel(event.channel);
+    if (event.channel.isEmpty) {
+      emit(
+        state.copyWith(
+          ibcChannel: () => event.channel,
+          ibcChannelError: () => TextError(error: 'Channel ID is required'),
+        ),
+      );
+      return;
+    }
 
     emit(
       state.copyWith(
         ibcChannel: () => event.channel,
-        ibcChannelError: () => ibcChannelError,
+        ibcChannelError: () => null,
       ),
     );
-  }
-
-  /// Validate format: channel-{number}
-  TextError? _validateIbcChannel(String channel) {
-    if (channel.isEmpty) {
-      return TextError(error: 'Channel ID is required');
-    }
-
-    final channelRegex = RegExp(r'^channel-\d+$');
-    if (!channelRegex.hasMatch(channel)) {
-      return TextError(error: 'Invalid format. Use: channel-<number>');
-    }
-
-    return null;
   }
 
   Future<void> _onPreviewSubmitted(
