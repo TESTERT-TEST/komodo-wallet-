@@ -373,7 +373,7 @@ class WithdrawFormBloc extends Bloc<WithdrawFormEvent, WithdrawFormState> {
       emit(
         state.copyWith(
           ibcChannel: () => event.channel,
-          ibcChannelError: () => TextError(error: 'Channel ID is required'),
+          ibcChannelError: () => TextError(error: LocaleKeys.enterIbcChannel.tr()),
         ),
       );
       return;

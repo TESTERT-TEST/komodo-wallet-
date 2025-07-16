@@ -300,8 +300,7 @@ abstract class  LocaleKeys {
   static const contactRequiredError = 'contactRequiredError';
   static const contactDetailsMaxLengthError = 'contactDetailsMaxLengthError';
   static const discordUsernameValidatorError = 'discordUsernameValidatorError';
-  static const telegramUsernameValidatorError =
-      'telegramUsernameValidatorError';
+  static const telegramUsernameValidatorError = 'telegramUsernameValidatorError';
   static const matrixIdValidatorError = 'matrixIdValidatorError';
   static const myCoinsMissing = 'myCoinsMissing';
   static const myCoinsMissingReassurance = 'myCoinsMissingReassurance';
@@ -683,6 +682,7 @@ abstract class  LocaleKeys {
   static const ibcTransferFieldSubtitle = 'ibcTransferFieldSubtitle';
   static const ibcChannel = 'ibcChannel';
   static const ibcChannelHint = 'ibcChannelHint';
+  static const enterIbcChannel = 'enterIbcChannel';
   static const successPageHeadline = 'successPageHeadline';
   static const successPageBodySmall = 'successPageBodySmall';
   static const withdrawErrorCardTileTitle = 'withdrawErrorCardTileTitle';

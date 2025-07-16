@@ -589,20 +589,14 @@ class IbcChannelField extends StatelessWidget {
       builder: (context, state) {
         return UiTextFormField(
           key: const Key('withdraw-ibc-channel-input'),
-          labelText: 'IBC Channel',
-          hintText: 'Enter IBC channel ID',
+          labelText: LocaleKeys.ibcChannel.tr(),
+          hintText: LocaleKeys.ibcChannelHint.tr(),
           keyboardType: TextInputType.number,
           inputFormatters: [FilteringTextInputFormatter.digitsOnly],
           onChanged: (value) {
             context
                 .read<WithdrawFormBloc>()
                 .add(WithdrawFormIbcChannelChanged(value ?? ''));
-          },
-          validator: (value) {
-            if (value?.isEmpty ?? true) {
-              return 'Please enter IBC channel';
-            }
-            return null;
           },
         );
       },
