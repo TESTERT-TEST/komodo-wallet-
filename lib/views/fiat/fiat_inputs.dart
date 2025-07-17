@@ -4,10 +4,10 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:komodo_defi_sdk/komodo_defi_sdk.dart';
 import 'package:komodo_defi_types/komodo_defi_types.dart';
 import 'package:komodo_ui/komodo_ui.dart';
+import 'package:komodo_ui_kit/komodo_ui_kit.dart';
 import 'package:web_dex/bloc/fiat/models/fiat_price_info.dart';
 import 'package:web_dex/bloc/fiat/models/i_currency.dart';
 import 'package:web_dex/generated/codegen_loader.g.dart';
-import 'package:komodo_ui_kit/komodo_ui_kit.dart';
 import 'package:web_dex/views/fiat/custom_fiat_input_field.dart';
 import 'package:web_dex/views/fiat/fiat_currency_item.dart';
 import 'package:web_dex/views/fiat/fiat_icon.dart';
@@ -213,6 +213,12 @@ class FiatInputsState extends State<FiatInputs> {
                   onChanged: widget.onSourceAddressChanged,
                   isLoading: widget.selectedAssetAddress == null,
                   showBalanceIndicator: false,
+                  title: Text(
+                    LocaleKeys.destinationAddress.tr(),
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
+                  ),
                 ),
               ),
             ],

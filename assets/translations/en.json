@@ -47,6 +47,7 @@
   "done": "Done",
   "fees": "Fees",
   "recipientAddress": "Recipient address",
+  "destinationAddress": "Destination address",
   "transactionHash": "Transaction Hash",
   "transactionFailed": "Transaction Failed",
   "hash": "Hash",

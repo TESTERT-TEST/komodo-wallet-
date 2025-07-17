@@ -51,6 +51,7 @@ abstract class LocaleKeys {
   static const done = 'done';
   static const fees = 'fees';
   static const recipientAddress = 'recipientAddress';
+  static const destinationAddress = 'destinationAddress';
   static const transactionHash = 'transactionHash';
   static const transactionFailed = 'transactionFailed';
   static const hash = 'hash';
