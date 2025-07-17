@@ -222,8 +222,10 @@ class _FiatReceive extends StatelessWidget {
 
     double? percentage;
 
-    final double sellAmtFiat = getFiatAmount(dto.sellCoin, dto.sellAmount!);
-    final double receiveAmtFiat = getFiatAmount(dto.buyCoin, dto.buyAmount!);
+    final double sellAmtFiat =
+        getLastKnownUsdAmount(dto.sellCoin.id, dto.sellAmount!).toDouble();
+    final double receiveAmtFiat =
+        getLastKnownUsdAmount(dto.buyCoin.id, dto.buyAmount!).toDouble();
 
     if (sellAmtFiat > 0 && receiveAmtFiat > 0) {
       percentage = (receiveAmtFiat - sellAmtFiat) * 100 / sellAmtFiat;

@@ -287,7 +287,7 @@ class CoinsBloc extends Bloc<CoinsEvent, CoinsState> {
     CoinsPricesUpdated event,
     Emitter<CoinsState> emit,
   ) async {
-    final prices = await _coinsRepo.fetchCurrentPrices();
+    final prices = await _coinsRepo.fetchCurrentPrices().last;
     if (prices == null) {
       _log.severe('Coin prices list empty/null');
       return;

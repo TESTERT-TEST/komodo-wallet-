@@ -524,7 +524,7 @@ class PortfolioGrowthRepository {
   /// the 24h change by multiplying each coin's percentage change by its USD balance
   Future<double> calculateTotalChange24h(List<Coin> coins) async {
     // Fetch current prices including 24h change data
-    final prices = await _coinsRepository.fetchCurrentPrices() ?? {};
+    final prices = await _coinsRepository.fetchCurrentPrices().first ?? {};
 
     // Calculate the 24h change by summing the change percentage of each coin
     // multiplied by its USD balance and divided by 100 (to convert percentage to decimal)
@@ -533,7 +533,7 @@ class PortfolioGrowthRepository {
       final price = prices[coin.id.symbol.configSymbol.toUpperCase()];
       final change24h = price?.change24h ?? 0.0;
       final usdBalance = coin.lastKnownUsdBalance(_sdk) ?? 0.0;
-      totalChange += (change24h * usdBalance / 100);
+      totalChange += change24h * usdBalance / 100;
     }
     return totalChange;
   }
@@ -549,6 +549,6 @@ class PortfolioGrowthRepository {
   ///
   /// This method ensures we have up-to-date price data before calculations
   Future<void> updatePrices() async {
-    await _coinsRepository.fetchCurrentPrices();
+    await _coinsRepository.fetchCurrentPrices().last;
   }
 }

@@ -1,5 +1,12 @@
+import 'package:decimal/decimal.dart';
+import 'package:get_it/get_it.dart';
+import 'package:komodo_defi_sdk/komodo_defi_sdk.dart';
+import 'package:komodo_defi_types/komodo_defi_types.dart';
 import 'package:rational/rational.dart';
 import 'package:web_dex/model/coin.dart';
+
+@Deprecated(
+    'Use getLastKnownUsdAmount or use KomodoDefiSdk.marketData.priceIfKnown instead')
 
 /// Calculates the fiat amount equivalent of the given [amount] of a [Coin] in USD.
 ///
@@ -26,9 +33,23 @@ import 'package:web_dex/model/coin.dart';
 /// double fiatAmount = getFiatAmount(ethereum, amount);
 /// print(fiatAmount); // Output: 30000.0 (USD)
 /// ```
-/// unit tests: [get_fiat_amount_tests]
 double getFiatAmount(Coin coin, Rational amount) {
   final double usdPrice = coin.usdPrice?.price ?? 0.00;
   final Rational usdPriceRational = Rational.parse(usdPrice.toString());
   return (amount * usdPriceRational).toDouble();
+}
+
+Decimal getLastKnownUsdAmount(
+  AssetId assetId,
+  Rational amount, {
+  KomodoDefiSdk? sdk,
+}) {
+  sdk ??= GetIt.instance<KomodoDefiSdk>();
+
+  final price = sdk.marketData.priceIfKnown(assetId);
+  if (price == null) {
+    return Decimal.zero;
+  }
+
+  return amount.toDecimal() * price;
 }

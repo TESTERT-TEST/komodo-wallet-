@@ -59,6 +59,9 @@ class CoinsRepo {
   // Map to keep track of active balance watchers
   final Map<AssetId, StreamSubscription<BalanceInfo>> _balanceWatchers = {};
 
+  // Mutex to prevent concurrent price updates
+  Completer<void>? _priceUpdateCompleter;
+
   /// Hack used to broadcast activated/deactivated coins to the CoinsBloc to
   /// update the status of the coins in the UI layer. This is needed as there
   /// are direct references to [CoinsRepo] that activate/deactivate coins
@@ -483,55 +486,115 @@ class CoinsRepo {
     return parsedAmount * usdPrice;
   }
 
-  Future<Map<String, CexPrice>?> fetchCurrentPrices() async {
+  /// Fetch the current prices for all activated coins.
+  /// This method uses the KomodoDefiSdk's market data manager to
+  /// fetch prices for all activated assets. It will first try to get
+  /// prices from the SDK's price manager, and if that fails or
+  /// returns no prices, it will fall back to the legacy main and
+  /// fallback price sources.
+  Stream<Map<String, CexPrice>?> fetchCurrentPrices() async* {
+    if (_priceUpdateCompleter != null && !_priceUpdateCompleter!.isCompleted) {
+      await _priceUpdateCompleter!.future;
+      yield Map.unmodifiable(_pricesCache);
+      return;
+    }
+
+    final completer = Completer<void>();
+    _priceUpdateCompleter = completer;
+
     try {
-      // Try to use the SDK's price manager to get prices for active coins
-      final activatedAssets = await _kdfSdk.assets.getActivatedAssets();
-      for (final asset in activatedAssets) {
-        try {
-          // Use maybeFiatPrice to avoid errors for assets not tracked by CEX
-          final fiatPrice = await _kdfSdk.marketData.maybeFiatPrice(asset.id);
-          if (fiatPrice != null) {
-            // Use configSymbol to lookup for backwards compatibility with the old,
-            // string-based price list (and fallback)
-            final change24h = await _kdfSdk.marketData.priceChange24h(asset.id);
-            _pricesCache[asset.id.symbol.configSymbol] = CexPrice(
-              ticker: asset.id.id,
-              price: fiatPrice.toDouble(),
-              lastUpdated: DateTime.now(),
-              change24h: change24h?.toDouble(),
-            );
-          }
-        } catch (e) {
-          _log.warning('Failed to get price for ${asset.id.id}: $e');
-        }
+      // Avoid yielding an empty cache at the start to prevent issues with
+      // downstream consumers that expect prices to be available
+      // (e.g. Portfolio Growth).
+      if (_pricesCache.isNotEmpty) {
+        yield Map.unmodifiable(_pricesCache);
       }
 
-      // Still use the backup methods for other coins or if SDK fails
-      final Map<String, CexPrice>? fallbackPrices =
-          await _updateFromMain() ?? await _updateFromFallback();
+      try {
+        final newPricesCache = await _fetchPricesFromSdk();
+        _pricesCache = Map.unmodifiable(newPricesCache);
+      } on Exception catch (e, s) {
+        _log.shout('Error refreshing prices from SDK', e, s);
 
-      if (fallbackPrices != null) {
-        // Merge fallback prices with SDK prices (don't overwrite SDK prices)
-        fallbackPrices.forEach((key, value) {
-          if (!_pricesCache.containsKey(key)) {
-            _pricesCache[key] = value;
-          }
-        });
+        // Fallback to the existing methods
+        final Map<String, CexPrice>? prices =
+            await _updateFromMain() ?? await _updateFromFallback();
+
+        _pricesCache = Map.unmodifiable(prices ?? {});
       }
-    } catch (e, s) {
-      _log.shout('Error refreshing prices from SDK', e, s);
 
-      // Fallback to the existing methods
-      final Map<String, CexPrice>? prices =
-          await _updateFromMain() ?? await _updateFromFallback();
+      completer.complete();
+      yield Map.unmodifiable(_pricesCache);
+    } catch (e) {
+      completer.completeError(e);
+      rethrow;
+    }
 
-      if (prices != null) {
-        _pricesCache = prices;
+    assert(
+      _priceUpdateCompleter == completer,
+      'Price update completer mismatch',
+    );
+    _priceUpdateCompleter = null;
+
+    assert(
+      _pricesCache.isNotEmpty,
+      'Prices cache should not be empty after fetching prices',
+    );
+    if (_pricesCache.isEmpty) {
+      _log.warning('Prices cache is empty after fetching prices');
+    }
+  }
+
+  Future<Map<String, CexPrice>> _fetchPricesFromSdk() async {
+    final newPricesCache = Map<String, CexPrice>.from(_pricesCache);
+
+    final activatedAssets = await _kdfSdk.assets.getActivatedAssets();
+    for (final asset in activatedAssets) {
+      try {
+        newPricesCache[asset.id.symbol.configSymbol] =
+            await _marketDataFiatPrice(asset);
+      } on Exception catch (e) {
+        _log.warning('Failed to get price for ${asset.id.id}: $e');
       }
     }
 
-    return _pricesCache;
+    // Still use the backup methods for other coins or if SDK fails
+    final Map<String, CexPrice>? fallbackPrices =
+        await _updateFromMain() ?? await _updateFromFallback();
+
+    if (fallbackPrices != null) {
+      // Merge fallback prices with SDK prices (don't overwrite SDK prices)
+      fallbackPrices.forEach((key, value) {
+        if (!newPricesCache.containsKey(key)) {
+          newPricesCache[key] = value;
+        }
+      });
+    }
+    return newPricesCache;
+  }
+
+  Future<CexPrice> _marketDataFiatPrice(Asset asset) async {
+    // Use maybeFiatPrice to avoid errors for assets not tracked by CEX
+    final fiatPrice = await _kdfSdk.marketData.maybeFiatPrice(asset.id);
+    if (fiatPrice == null) {
+      _log.warning(
+        'No fiat price found for asset ${asset.id.id}. '
+        'Using zero price.',
+      );
+      throw StateError(
+        'No fiat price found for asset ${asset.id.id}',
+      );
+    }
+
+    // Use configSymbol to lookup for backwards compatibility with the old,
+    // string-based price list (and fallback)
+    final change24h = await _kdfSdk.marketData.priceChange24h(asset.id);
+    return CexPrice(
+      ticker: asset.id.id,
+      price: fiatPrice.toDouble(),
+      lastUpdated: DateTime.now(),
+      change24h: change24h?.toDouble(),
+    );
   }
 
   Future<Map<String, CexPrice>?> _updateFromMain() async {

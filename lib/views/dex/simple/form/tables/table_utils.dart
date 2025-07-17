@@ -79,8 +79,8 @@ List<BestOrder> _sortBestOrders(
     final Coin? coinB = coinsRepository.getCoin(b.coin);
     if (coinA == null || coinB == null) return 0;
 
-    final double fiatPriceA = getFiatAmount(coinA, a.price);
-    final double fiatPriceB = getFiatAmount(coinB, b.price);
+    final fiatPriceA = getLastKnownUsdAmount(coinA.id, a.price);
+    final fiatPriceB = getLastKnownUsdAmount(coinB.id, b.price);
 
     if (fiatPriceA > fiatPriceB) return -1;
     if (fiatPriceA < fiatPriceB) return 1;

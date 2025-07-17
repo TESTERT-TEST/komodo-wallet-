@@ -1,4 +1,5 @@
 import 'package:app_theme/app_theme.dart';
+import 'package:decimal/decimal.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -193,10 +194,10 @@ class _TakerOrderConfirmationState extends State<TakerOrderConfirmation> {
     if (sellAmount == null || buyAmount == null) return const SizedBox();
 
     Color? color = Theme.of(context).textTheme.bodyMedium?.color;
-    double? percentage;
+    Rational? percentage;
 
-    final double sellAmtFiat = getFiatAmount(sellCoin, sellAmount);
-    final double receiveAmtFiat = getFiatAmount(buyCoin, buyAmount);
+    final sellAmtFiat = getLastKnownUsdAmount(sellCoin.id, sellAmount);
+    final receiveAmtFiat = getLastKnownUsdAmount(buyCoin.id, buyAmount);
 
     if (sellAmtFiat < receiveAmtFiat) {
       color = theme.custom.increaseColor;
@@ -204,8 +205,9 @@ class _TakerOrderConfirmationState extends State<TakerOrderConfirmation> {
       color = theme.custom.decreaseColor;
     }
 
-    if (sellAmtFiat > 0 && receiveAmtFiat > 0) {
-      percentage = (receiveAmtFiat - sellAmtFiat) * 100 / sellAmtFiat;
+    if (sellAmtFiat > Decimal.zero && receiveAmtFiat > Decimal.zero) {
+      percentage =
+          (receiveAmtFiat - sellAmtFiat) * Decimal.fromInt(100) / sellAmtFiat;
     }
 
     return Row(
@@ -213,7 +215,8 @@ class _TakerOrderConfirmationState extends State<TakerOrderConfirmation> {
       children: [
         FiatAmount(coin: buyCoin, amount: buyAmount),
         if (percentage != null)
-          Text(' (${percentage > 0 ? '+' : ''}${formatAmt(percentage)}%)',
+          Text(
+              ' (${percentage > Rational.zero ? '+' : ''}${formatAmt(percentage.toDouble())}%)',
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
                     fontSize: 11,
                     color: color,
