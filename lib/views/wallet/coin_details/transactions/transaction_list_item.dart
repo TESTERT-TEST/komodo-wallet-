@@ -100,14 +100,17 @@ class _TransactionListRowState extends State<TransactionListRow> {
               : theme.custom.decreaseColor,
         ),
         const SizedBox(width: 4),
-        Text(
-          '${Coin.normalizeAbbr(widget.transaction.assetId.id)} $formatted',
-          style: TextStyle(
-            color: _isReceived
-                ? theme.custom.increaseColor
-                : theme.custom.decreaseColor,
-            fontSize: 14,
-            fontWeight: FontWeight.w500,
+        Flexible(
+          child: AutoScrollText(
+            text:
+                '$formatted ${Coin.normalizeAbbr(widget.transaction.assetId.id)} ',
+            style: TextStyle(
+              color: _isReceived
+                  ? theme.custom.increaseColor
+                  : theme.custom.decreaseColor,
+              fontSize: 14,
+              fontWeight: FontWeight.w500,
+            ),
           ),
         ),
       ],
@@ -143,11 +146,13 @@ class _TransactionListRowState extends State<TransactionListRow> {
         children: [
           _buildMemo(),
           const SizedBox(width: 6),
-          Text(
-            formatTransactionDateTime(widget.transaction),
-            style: isMobile
-                ? TextStyle(color: Colors.grey[400])
-                : const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
+          Expanded(
+            child: AutoScrollText(
+              text: formatTransactionDateTime(widget.transaction),
+              style: isMobile
+                  ? TextStyle(color: Colors.grey[400])
+                  : const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
+            ),
           ),
           const SizedBox(width: 4),
         ],
@@ -196,8 +201,9 @@ class _TransactionListRowState extends State<TransactionListRow> {
     return Row(
       mainAxisSize: MainAxisSize.max,
       children: [
-        Expanded(
-          flex: 4,
+        SizedBox(width: 8),
+        SizedBox(
+          width: 380,
           child: _TransactionAddress(
             transaction: widget.transaction,
             coinAbbr: widget.coinAbbr,
@@ -236,12 +242,9 @@ class _TransactionListRowState extends State<TransactionListRow> {
           const SizedBox(height: 6),
           ConstrainedBox(
             constraints: const BoxConstraints(maxHeight: 120),
-            child: SingleChildScrollView(
-              controller: ScrollController(),
-              child: Text(
-                memo,
-                style: const TextStyle(fontSize: 14),
-              ),
+            child: AutoScrollText(
+              text: memo,
+              style: const TextStyle(fontSize: 14),
             ),
           ),
         ],
@@ -260,8 +263,8 @@ class _TransactionListRowState extends State<TransactionListRow> {
       widget.transaction.amount.toString(),
       widget.coinAbbr,
     );
-    return Text(
-      '$_sign \$${formatAmt((usdChanges ?? 0).abs())}',
+    return AutoScrollText(
+      text: '$_sign \$${formatAmt((usdChanges ?? 0).abs())}',
       style: TextStyle(
         color: _isReceived
             ? theme.custom.increaseColor
@@ -295,15 +298,22 @@ class _TransactionAddress extends StatelessWidget {
     }
 
     return Row(
+      spacing: 8,
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        const SizedBox(width: 8),
-        AddressIcon(address: myAddress),
-        const SizedBox(width: 8),
         Flexible(
-          child: AutoScrollText(
-            text: myAddress,
-            style: const TextStyle(fontSize: 14),
-            isSelectable: true,
+          child: Row(
+            spacing: 8,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              AddressIcon(address: myAddress),
+              Expanded(
+                child: AutoScrollText(
+                  text: myAddress,
+                  style: const TextStyle(fontSize: 14),
+                ),
+              ),
+            ],
           ),
         ),
         AddressCopyButton(address: myAddress),
