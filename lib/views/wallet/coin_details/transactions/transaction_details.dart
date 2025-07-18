@@ -13,6 +13,7 @@ import 'package:web_dex/model/coin.dart';
 import 'package:web_dex/shared/utils/formatters.dart';
 import 'package:web_dex/shared/utils/utils.dart';
 import 'package:web_dex/shared/widgets/copied_text.dart';
+import 'package:web_dex/views/wallet/common/address_copy_button.dart';
 
 class TransactionDetails extends StatelessWidget {
   const TransactionDetails({
@@ -144,14 +145,18 @@ class TransactionDetails extends StatelessWidget {
           const SizedBox(width: 8),
           ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 200),
-            child: CopiedText(
-              copiedValue: address,
-              isTruncated: true,
-              padding: const EdgeInsets.symmetric(
-                vertical: 8,
-                horizontal: 16,
-              ),
-              fontSize: 14,
+            child: Row(
+              children: [
+                Expanded(
+                  child: AutoScrollText(
+                    text: address,
+                    style: const TextStyle(fontSize: 14),
+                    isSelectable: true,
+                  ),
+                ),
+                const SizedBox(width: 8),
+                AddressCopyButton(address: address),
+              ],
             ),
           ),
         ],

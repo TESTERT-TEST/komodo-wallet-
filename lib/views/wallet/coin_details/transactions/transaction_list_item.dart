@@ -12,6 +12,7 @@ import 'package:web_dex/shared/utils/formatters.dart';
 import 'package:web_dex/views/wallet/common/address_copy_button.dart';
 import 'package:web_dex/views/wallet/common/address_icon.dart';
 import 'package:web_dex/views/wallet/common/address_text.dart';
+import 'package:komodo_ui_kit/komodo_ui_kit.dart';
 
 class TransactionListRow extends StatefulWidget {
   const TransactionListRow({
@@ -298,7 +299,13 @@ class _TransactionAddress extends StatelessWidget {
         const SizedBox(width: 8),
         AddressIcon(address: myAddress),
         const SizedBox(width: 8),
-        AddressText(address: myAddress),
+        Flexible(
+          child: AutoScrollText(
+            text: myAddress,
+            style: const TextStyle(fontSize: 14),
+            isSelectable: true,
+          ),
+        ),
         AddressCopyButton(address: myAddress),
       ],
     );
