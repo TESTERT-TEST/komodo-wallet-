@@ -14,7 +14,7 @@ class ProfitLossCalculator {
   /// Proceeds = Sum of the fiat price of the coin amount spent (sold)
   ///
   /// [transactions] is the list of transactions.
-  /// [coinId] is the id of the coin, generally the coin ticker. Eg: 'BTC'.
+  /// [coinId] is the AssetId of the coin. Eg: AssetId for 'BTC'.
   /// [fiatCoinId] is id of the fiat currency tether to convert the [coinId] to.
   /// E.g. 'USDT'. This can be any supported coin id, but the idea is to convert
   /// the coin to a fiat currency to calculate the profit/loss in fiat.
@@ -22,7 +22,7 @@ class ProfitLossCalculator {
   /// Returns the list of [ProfitLoss] for the coin.
   Future<List<ProfitLoss>> getProfitFromTransactions(
     List<Transaction> transactions, {
-    required String coinId,
+    required AssetId coinId,
     required String fiatCoinId,
   }) async {
     if (transactions.isEmpty) {
@@ -62,11 +62,10 @@ class ProfitLossCalculator {
   }
 
   Future<Map<DateTime, double>> _getTimestampedUsdPrices(
-    String coinId,
+    AssetId coinId,
     List<DateTime> dates,
   ) async {
-    final cleanCoinId = coinId.split('-').firstOrNull?.toUpperCase() ?? '';
-    return _cexRepository.getCoinFiatPrices(cleanCoinId, dates);
+    return _cexRepository.getCoinFiatPrices(coinId, dates);
   }
 
   List<ProfitLoss> _calculateProfitLosses(

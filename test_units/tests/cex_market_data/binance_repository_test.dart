@@ -1,14 +1,26 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:komodo_cex_market_data/komodo_cex_market_data.dart';
+import 'package:komodo_defi_types/komodo_defi_types.dart';
 
 import 'mocks/mock_failing_binance_provider.dart';
 
 void testFailingBinanceRepository() {
   late BinanceRepository binanceRepository;
+  late AssetId kmdAssetId;
 
   setUp(() {
     binanceRepository = BinanceRepository(
       binanceProvider: const MockFailingBinanceProvider(),
+    );
+
+    // Create KMD AssetId for tests
+    kmdAssetId = AssetId(
+      id: 'KMD',
+      name: 'Komodo',
+      symbol: AssetSymbol(assetConfigId: 'KMD'),
+      chainId: AssetChainId(chainId: 0),
+      derivationPath: '',
+      subClass: CoinSubClass.utxo,
     );
   });
 
@@ -18,8 +30,7 @@ void testFailingBinanceRepository() {
       expect(response, isEmpty);
     });
 
-    test(
-        'OHLC request rethrows [UnsupportedError] if all requests fail',
+    test('OHLC request rethrows [UnsupportedError] if all requests fail',
         () async {
       expect(
         () async {
@@ -37,7 +48,7 @@ void testFailingBinanceRepository() {
         () async {
       expect(
         () async {
-          final response = await binanceRepository.getCoinFiatPrice('KMD');
+          final response = await binanceRepository.getCoinFiatPrice(kmdAssetId);
           return response;
         },
         throwsUnsupportedError,
@@ -49,7 +60,7 @@ void testFailingBinanceRepository() {
       expect(
         () async {
           final response = await binanceRepository
-              .getCoinFiatPrices('KMD', [DateTime.now()]);
+              .getCoinFiatPrices(kmdAssetId, [DateTime.now()]);
           return response;
         },
         throwsUnsupportedError,

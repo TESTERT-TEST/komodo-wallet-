@@ -263,7 +263,7 @@ class ProfitLossRepository {
     final List<ProfitLoss> profitLosses =
         await _profitLossCalculator.getProfitFromTransactions(
       transactions,
-      coinId: coinId.id,
+      coinId: coinId,
       fiatCoinId: fiatCoinId,
     );
     calcStopwatch.stop();

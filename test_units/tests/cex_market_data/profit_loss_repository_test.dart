@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:komodo_cex_market_data/komodo_cex_market_data.dart';
+import 'package:komodo_defi_types/komodo_defi_types.dart';
 import 'package:web_dex/bloc/cex_market_data/profit_loss/profit_loss_calculator.dart';
 
 import 'mocks/mock_binance_provider.dart';
@@ -19,6 +20,7 @@ void testNetProfitLossRepository() {
     late ProfitLossCalculator profitLossRepository;
     late CexRepository cexRepository;
     late double currentBtcPrice;
+    late AssetId btcAssetId;
 
     setUp(() async {
       cexRepository = BinanceRepository(
@@ -29,6 +31,17 @@ void testNetProfitLossRepository() {
       profitLossRepository = ProfitLossCalculator(
         cexRepository,
       );
+
+      // Create BTC AssetId for tests
+      btcAssetId = AssetId(
+        id: 'BTC',
+        name: 'Bitcoin',
+        symbol: AssetSymbol(assetConfigId: 'BTC'),
+        chainId: AssetChainId(chainId: 9),
+        derivationPath: '',
+        subClass: CoinSubClass.utxo,
+      );
+
       final currentDate = DateTime.now();
       final currentDateMidnight = DateTime(
         currentDate.year,
@@ -36,7 +49,7 @@ void testNetProfitLossRepository() {
         currentDate.day,
       );
       currentBtcPrice = await cexRepository.getCoinFiatPrice(
-        'BTC',
+        btcAssetId,
         priceDate: currentDateMidnight,
       );
     });
@@ -44,7 +57,7 @@ void testNetProfitLossRepository() {
     test('should return empty list when transactions are empty', () async {
       final result = await profitLossRepository.getProfitFromTransactions(
         [],
-        coinId: 'BTC',
+        coinId: btcAssetId,
         fiatCoinId: 'USD',
       );
 
@@ -57,7 +70,7 @@ void testNetProfitLossRepository() {
 
       final result = await profitLossRepository.getProfitFromTransactions(
         transactions,
-        coinId: 'BTC',
+        coinId: btcAssetId,
         fiatCoinId: 'USD',
       );
 
@@ -75,7 +88,7 @@ void testNetProfitLossRepository() {
 
       final result = await profitLossRepository.getProfitFromTransactions(
         transactions,
-        coinId: 'BTC',
+        coinId: btcAssetId,
         fiatCoinId: 'USD',
       );
       final expectedProfitLossT1 = (currentBtcPrice * 1.0) - (50740.50 * 1.0);
@@ -107,7 +120,7 @@ void testNetProfitLossRepository() {
 
       final result = await profitLossRepository.getProfitFromTransactions(
         transactions,
-        coinId: 'BTC',
+        coinId: btcAssetId,
         fiatCoinId: 'USD',
       );
 
@@ -141,7 +154,7 @@ void testNetProfitLossRepository() {
 
       final result = await profitLossRepository.getProfitFromTransactions(
         transactions,
-        coinId: 'BTC',
+        coinId: btcAssetId,
         fiatCoinId: 'USD',
       );
 
@@ -158,6 +171,7 @@ void testRealisedProfitLossRepository() {
   group('getProfitFromTransactions', () {
     late ProfitLossCalculator profitLossRepository;
     late CexRepository cexRepository;
+    late AssetId btcAssetId;
 
     setUp(() async {
       cexRepository = BinanceRepository(
@@ -167,6 +181,16 @@ void testRealisedProfitLossRepository() {
         cexRepository,
       );
       await cexRepository.getCoinList();
+
+      // Create BTC AssetId for tests
+      btcAssetId = AssetId(
+        id: 'BTC',
+        name: 'Bitcoin',
+        symbol: AssetSymbol(assetConfigId: 'BTC'),
+        chainId: AssetChainId(chainId: 9),
+        derivationPath: '',
+        subClass: CoinSubClass.utxo,
+      );
     });
 
     test('return the unrealised profit/loss for a single transaction',
@@ -175,7 +199,7 @@ void testRealisedProfitLossRepository() {
 
       final result = await profitLossRepository.getProfitFromTransactions(
         transactions,
-        coinId: 'BTC',
+        coinId: btcAssetId,
         fiatCoinId: 'USD',
       );
 
@@ -194,7 +218,7 @@ void testRealisedProfitLossRepository() {
 
       final result = await profitLossRepository.getProfitFromTransactions(
         transactions,
-        coinId: 'BTC',
+        coinId: btcAssetId,
         fiatCoinId: 'USD',
       );
 
@@ -218,7 +242,7 @@ void testRealisedProfitLossRepository() {
 
       final result = await profitLossRepository.getProfitFromTransactions(
         transactions,
-        coinId: 'BTC',
+        coinId: btcAssetId,
         fiatCoinId: 'USD',
       );
 
@@ -242,7 +266,7 @@ void testRealisedProfitLossRepository() {
 
       final result = await profitLossRepository.getProfitFromTransactions(
         transactions,
-        coinId: 'BTC',
+        coinId: btcAssetId,
         fiatCoinId: 'USD',
       );
 
