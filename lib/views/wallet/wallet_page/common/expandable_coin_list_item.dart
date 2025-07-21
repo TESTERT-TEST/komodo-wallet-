@@ -1,23 +1,26 @@
 // lib/src/defi/asset/coin_list_item.dart
 
-import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
-import 'package:web_dex/generated/codegen_loader.g.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:komodo_defi_sdk/komodo_defi_sdk.dart';
-import 'package:komodo_ui/komodo_ui.dart';
-import 'package:web_dex/app_config/app_config.dart';
-import 'package:web_dex/bloc/coins_bloc/coins_bloc.dart';
-import 'package:web_dex/model/coin.dart';
 import 'package:komodo_defi_types/komodo_defi_types.dart';
+import 'package:komodo_ui/komodo_ui.dart';
+import 'package:web_dex/bloc/coins_bloc/coins_bloc.dart';
+import 'package:web_dex/bloc/trading_status/trading_status_bloc.dart';
+import 'package:web_dex/common/screen.dart';
+import 'package:web_dex/generated/codegen_loader.g.dart';
+import 'package:web_dex/model/coin.dart';
 import 'package:web_dex/shared/utils/utils.dart';
 import 'package:web_dex/shared/widgets/coin_balance.dart';
 import 'package:web_dex/shared/widgets/coin_fiat_balance.dart';
 import 'package:web_dex/shared/widgets/coin_item/coin_item.dart';
 import 'package:web_dex/shared/widgets/coin_item/coin_item_size.dart';
-import 'package:web_dex/views/wallet/common/wallet_helper.dart';
-import 'package:get_it/get_it.dart';
+import 'package:app_theme/src/dark/theme_custom_dark.dart';
+import 'package:app_theme/src/light/theme_custom_light.dart';
 
+/// Widget for showing an authenticated user's balance and anddresses for a
+/// given coin
+// TODO: Refactor to `AssetId` and migrate to the SDK UI library.
 class ExpandableCoinListItem extends StatefulWidget {
   final Coin coin;
   final AssetPubkeys? pubkeys;
@@ -73,12 +76,20 @@ class _ExpandableCoinListItemState extends State<ExpandableCoinListItem> {
           ..sort((a, b) => b.balance.spendable.compareTo(a.balance.spendable)))
         : null;
 
+    // Match GroupedAssetTickerItem: 16 horizontal, 16 vertical for both (mobile)
+    // For desktop, set vertical padding to achieve 78px height
+    final horizontalPadding = 16.0;
+    final verticalPadding = isMobile ? 16.0 : 22.0; // 34 (icon) + 22*2 = 78
+
+    // TODO! Change rotation of the icon in contracted state
     return CollapsibleCard(
       key: PageStorageKey('coin_${widget.coin.abbr}'),
       borderRadius: BorderRadius.circular(12),
-      headerPadding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
+      headerPadding: EdgeInsets.symmetric(
+          horizontal: horizontalPadding, vertical: verticalPadding),
       onTap: widget.onTap,
-      childrenMargin: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
+      childrenMargin: EdgeInsets.symmetric(
+          horizontal: horizontalPadding, vertical: verticalPadding),
       childrenDecoration: BoxDecoration(
         color: Theme.of(context).colorScheme.surfaceContainer,
         borderRadius: BorderRadius.circular(12),
@@ -109,6 +120,86 @@ class _ExpandableCoinListItemState extends State<ExpandableCoinListItem> {
   Widget _buildTitle(BuildContext context) {
     final theme = Theme.of(context);
 
+    if (isMobile) {
+      return _buildMobileTitle(context, theme);
+    } else {
+      return _buildDesktopTitle(context, theme);
+    }
+  }
+
+  Widget _buildMobileTitle(BuildContext context, ThemeData theme) {
+    return Container(
+      alignment: Alignment.centerLeft,
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          // Use CoinItem with large size for mobile, matching GroupedAssetTickerItem
+          AssetIcon(widget.coin.id, size: CoinItemSize.large.coinLogo),
+          const SizedBox(width: 8),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Coin name - using headlineMedium for bold 16px text
+              Text(
+                widget.coin.name,
+                style: theme.textTheme.headlineMedium,
+              ),
+              // Crypto balance - using bodySmall for 12px secondary text
+              Text(
+                '${doubleToString(widget.coin.balance(context.sdk) ?? 0)} ${widget.coin.abbr}',
+                style: theme.textTheme.bodySmall,
+              ),
+            ],
+          ),
+          const Spacer(),
+          // Right side: Price and trend info
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              // Current balance in USD - using headlineMedium for bold 16px text
+              Text(
+                '\$${widget.coin.lastKnownUsdBalance(context.sdk) != null ? NumberFormat("#,##0.00").format(widget.coin.lastKnownUsdBalance(context.sdk)!) : "0.00"}',
+                style: theme.textTheme.headlineMedium,
+              ),
+              const SizedBox(height: 2),
+              // Trend percentage
+              BlocBuilder<CoinsBloc, CoinsState>(
+                builder: (context, state) {
+                  final usdBalance =
+                      widget.coin.lastKnownUsdBalance(context.sdk) ?? 0.0;
+                  final change24hPercent = usdBalance == 0.0
+                      ? 0.0
+                      : state.get24hChangeForAsset(widget.coin.id);
+                  // Calculate the 24h USD change value
+                  final change24hValue =
+                      change24hPercent != null && usdBalance > 0
+                          ? (change24hPercent * usdBalance / 100)
+                          : 0.0;
+                  final themeCustom =
+                      Theme.of(context).brightness == Brightness.dark
+                          ? Theme.of(context).extension<ThemeCustomDark>()!
+                          : Theme.of(context).extension<ThemeCustomLight>()!;
+                  return TrendPercentageText(
+                    percentage: change24hPercent ?? 0.0,
+                    upColor: themeCustom.increaseColor,
+                    downColor: themeCustom.decreaseColor,
+                    value: change24hValue,
+                    valueFormatter: (value) =>
+                        NumberFormat.currency(symbol: '\$').format(value),
+                    iconSize: 12,
+                    spacing: 2,
+                    textStyle: theme.textTheme.bodySmall,
+                  );
+                },
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDesktopTitle(BuildContext context, ThemeData theme) {
     return Container(
       alignment: Alignment.centerLeft,
       child: Row(
@@ -120,24 +211,36 @@ class _ExpandableCoinListItemState extends State<ExpandableCoinListItem> {
             child: CoinItem(coin: widget.coin, size: CoinItemSize.large),
           ),
           const Spacer(),
-          Expanded(
-            flex: 2,
-            child: Align(
-              alignment: Alignment.centerLeft,
-              child: CoinBalance(coin: widget.coin),
-            ),
+          CoinBalance(coin: widget.coin),
+          BlocBuilder<CoinsBloc, CoinsState>(
+            builder: (context, state) {
+              final usdBalance =
+                  widget.coin.lastKnownUsdBalance(context.sdk) ?? 0.0;
+
+              final change24hPercent = usdBalance == 0.0
+                  ? 0.0
+                  : state.get24hChangeForAsset(widget.coin.id);
+
+              // Calculate the 24h USD change value
+              final change24hValue = change24hPercent != null && usdBalance > 0
+                  ? (change24hPercent * usdBalance / 100)
+                  : 0.0;
+
+              final themeCustom =
+                  Theme.of(context).brightness == Brightness.dark
+                      ? Theme.of(context).extension<ThemeCustomDark>()!
+                      : Theme.of(context).extension<ThemeCustomLight>()!;
+              return TrendPercentageText(
+                percentage: change24hPercent,
+                upColor: themeCustom.increaseColor,
+                downColor: themeCustom.decreaseColor,
+                value: change24hValue,
+                valueFormatter: (value) =>
+                    NumberFormat.currency(symbol: '\$').format(value),
+              );
+            },
           ),
-          TrendPercentageText(
-            percentage: getTotal24Change(
-                  [widget.coin],
-                  GetIt.I<KomodoDefiSdk>(),
-                ) ??
-                0,
-            iconSize: 16,
-            spacing: 4,
-            textStyle: theme.textTheme.bodyMedium,
-          ),
-          const Spacer(),
+          // const Spacer(),
         ],
       ),
     );
@@ -163,62 +266,63 @@ class _AddressRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    return ListTile(
-      onTap: onTap,
-      contentPadding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
-      leading: CircleAvatar(
-        radius: 16,
-        backgroundColor: theme.colorScheme.surfaceContainerHigh,
-        child: const Icon(Icons.person_outline),
-      ),
-      title: Row(
-        children: [
-          Text(
-            pubkey.addressShort,
-            style: theme.textTheme.bodyMedium,
-          ),
-          const SizedBox(width: 8),
-          Material(
-            color: Colors.transparent,
-            child: IconButton(
-              iconSize: 16,
-              icon: const Icon(Icons.copy),
-              onPressed: onCopy,
-              visualDensity: VisualDensity.compact,
-              // constraints: const BoxConstraints(
-              //   minWidth: 32,
-              //   minHeight: 32,
-              // ),
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(12),
+      child: ListTile(
+        onTap: onTap,
+        contentPadding:
+            const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+        leading: CircleAvatar(
+          radius: 16,
+          backgroundColor: theme.colorScheme.surfaceContainerHigh,
+          child: const Icon(Icons.person_outline),
+        ),
+        title: Row(
+          children: [
+            Text(
+              pubkey.addressShort,
+              style: theme.textTheme.bodyMedium,
             ),
-          ),
-          if (isSwapAddress && !kIsWalletOnly) ...[
             const SizedBox(width: 8),
-            const Chip(
-              label: Text(
-                'Swap',
-                // style: theme.textTheme.labelSmall,
+            Material(
+              color: Colors.transparent,
+              child: IconButton(
+                iconSize: 16,
+                icon: const Icon(Icons.copy),
+                onPressed: onCopy,
+                visualDensity: VisualDensity.compact,
               ),
-              // backgroundColor: theme.colorScheme.primaryContainer,
+            ),
+            if (isSwapAddress &&
+                context.watch<TradingStatusBloc>().state is TradingEnabled) ...[
+              const SizedBox(width: 8),
+              const Chip(
+                label: Text(
+                  'Swap',
+                  // style: theme.textTheme.labelSmall,
+                ),
+                // backgroundColor: theme.colorScheme.primaryContainer,
+              ),
+            ],
+          ],
+        ),
+        trailing: Column(
+          crossAxisAlignment: CrossAxisAlignment.end,
+          children: [
+            Text(
+              '${doubleToString(pubkey.balance.spendable.toDouble())} ${coin.abbr}',
+              style: theme.textTheme.bodyMedium?.copyWith(
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+            CoinFiatBalance(
+              coin,
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
             ),
           ],
-        ],
-      ),
-      trailing: Column(
-        crossAxisAlignment: CrossAxisAlignment.end,
-        children: [
-          Text(
-            '${doubleToString(pubkey.balance.spendable.toDouble())} ${coin.abbr}',
-            style: theme.textTheme.bodyMedium?.copyWith(
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-          CoinFiatBalance(
-            coin,
-            style: theme.textTheme.bodySmall?.copyWith(
-              color: theme.colorScheme.onSurfaceVariant,
-            ),
-          ),
-        ],
+        ),
       ),
     );
   }
@@ -235,11 +339,10 @@ class CoinMoreActionsButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return PopupMenuButton<CoinMoreActions>(
       icon: const Icon(Icons.more_vert),
-      onSelected: (action) {
+      onSelected: (action) async {
         switch (action) {
           case CoinMoreActions.disable:
-            context.read<CoinsBloc>().add(CoinsDeactivated([coin.abbr]));
-            break;
+            confirmBeforeDisablingCoin(coin, context, null);
         }
       },
       itemBuilder: (context) {

@@ -9,6 +9,7 @@ import 'package:web_dex/blocs/maker_form_bloc.dart';
 import 'package:web_dex/blocs/trading_entities_bloc.dart';
 import 'package:web_dex/bloc/analytics/analytics_bloc.dart';
 import 'package:web_dex/bloc/auth_bloc/auth_bloc.dart';
+import 'package:web_dex/bloc/trading_status/trading_status_bloc.dart';
 import 'package:web_dex/analytics/events/transaction_events.dart';
 import 'package:web_dex/common/screen.dart';
 import 'package:web_dex/generated/codegen_loader.g.dart';
@@ -126,6 +127,9 @@ class _MakerOrderConfirmationState extends State<MakerOrderConfirmation> {
   }
 
   Widget _buildConfirmButton() {
+    final tradingState = context.watch<TradingStatusBloc>().state;
+    final bool tradingEnabled = tradingState.isEnabled;
+
     return Opacity(
       opacity: _inProgress ? 0.8 : 1,
       child: UiPrimaryButton(
@@ -141,8 +145,10 @@ class _MakerOrderConfirmationState extends State<MakerOrderConfirmation> {
                   ),
                 )
               : null,
-          onPressed: _inProgress ? null : _startSwap,
-          text: LocaleKeys.confirm.tr()),
+          onPressed: _inProgress || !tradingEnabled ? null : _startSwap,
+          text: tradingEnabled
+              ? LocaleKeys.confirm.tr()
+              : LocaleKeys.tradingDisabled.tr()),
     );
   }
 
@@ -321,7 +327,9 @@ class _MakerOrderConfirmationState extends State<MakerOrderConfirmation> {
           ),
         );
 
+    final int callStart = DateTime.now().millisecondsSinceEpoch;
     final TextError? error = await makerFormBloc.makeOrder();
+    final int durationMs = DateTime.now().millisecondsSinceEpoch - callStart;
 
     final tradingEntitiesBloc =
         // ignore: use_build_context_synchronously
@@ -340,6 +348,7 @@ class _MakerOrderConfirmationState extends State<MakerOrderConfirmation> {
               toAsset: buyCoin,
               failStage: 'order_submission',
               walletType: walletType,
+              durationMs: durationMs,
             ),
           );
       setState(() => _errorMessage = error.error);
@@ -353,6 +362,7 @@ class _MakerOrderConfirmationState extends State<MakerOrderConfirmation> {
             amount: makerFormBloc.sellAmount!.toDouble(),
             fee: 0, // Fee data not available
             walletType: walletType,
+            durationMs: durationMs,
           ),
         );
     makerFormBloc.clear();

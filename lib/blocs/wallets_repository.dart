@@ -34,9 +34,13 @@ class WalletsRepository {
 
   Future<List<Wallet>> getWallets() async {
     final legacyWallets = await _getLegacyWallets();
+
+    // TODO: move wallet filtering logic to the SDK
     _cachedWallets = (await _kdfSdk.wallets)
         .where(
-          (wallet) => wallet.config.type != WalletType.trezor,
+          (wallet) =>
+              wallet.config.type != WalletType.trezor &&
+              !wallet.name.toLowerCase().startsWith(trezorWalletNamePrefix),
         )
         .toList();
     return [..._cachedWallets!, ...legacyWallets];
@@ -54,7 +58,10 @@ class WalletsRepository {
         .toList();
   }
 
-  Future<bool> deleteWallet(Wallet wallet) async {
+  Future<void> deleteWallet(
+    Wallet wallet, {
+    required String password,
+  }) async {
     log(
       'Deleting a wallet ${wallet.id}',
       path: 'wallet_bloc => deleteWallet',
@@ -64,11 +71,22 @@ class WalletsRepository {
       final wallets = await _getLegacyWallets();
       wallets.removeWhere((w) => w.id == wallet.id);
       await _legacyWalletStorage.write(allWalletsStorageKey, wallets);
-      return true;
+      return;
     }
 
-    // TODO!: implement
-    throw UnimplementedError('Not yet supported');
+    try {
+      await _kdfSdk.auth.deleteWallet(
+        walletName: wallet.name,
+        password: password,
+      );
+      _cachedWallets?.removeWhere((w) => w.name == wallet.name);
+      return;
+    } catch (e) {
+      log('Failed to delete wallet: $e',
+              path: 'wallet_bloc => deleteWallet', isError: true)
+          .ignore();
+      rethrow;
+    }
   }
 
   String? validateWalletName(String name) {
