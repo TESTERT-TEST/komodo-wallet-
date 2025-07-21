@@ -11,10 +11,10 @@ import 'package:komodo_defi_sdk/komodo_defi_sdk.dart';
 import 'package:komodo_ui/komodo_ui.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:universal_html/html.dart' as html;
+import 'package:web_dex/analytics/events.dart';
 import 'package:web_dex/app_config/app_config.dart';
 import 'package:web_dex/bloc/analytics/analytics_bloc.dart';
 import 'package:web_dex/bloc/analytics/analytics_repo.dart';
-import 'package:web_dex/analytics/events.dart';
 import 'package:web_dex/bloc/assets_overview/bloc/asset_overview_bloc.dart';
 import 'package:web_dex/bloc/assets_overview/investment_repository.dart';
 import 'package:web_dex/bloc/auth_bloc/auth_bloc.dart';
@@ -40,12 +40,14 @@ import 'package:web_dex/bloc/market_maker_bot/market_maker_bot/market_maker_bot_
 import 'package:web_dex/bloc/market_maker_bot/market_maker_order_list/market_maker_bot_order_list_repository.dart';
 import 'package:web_dex/bloc/nfts/nft_main_bloc.dart';
 import 'package:web_dex/bloc/nfts/nft_main_repo.dart';
+import 'package:web_dex/bloc/platform/platform_bloc.dart';
+import 'package:web_dex/bloc/platform/platform_event.dart';
 import 'package:web_dex/bloc/settings/settings_bloc.dart';
 import 'package:web_dex/bloc/settings/settings_repository.dart';
 import 'package:web_dex/bloc/system_health/system_clock_repository.dart';
 import 'package:web_dex/bloc/system_health/system_health_bloc.dart';
-import 'package:web_dex/bloc/trading_status/trading_status_bloc.dart';
 import 'package:web_dex/bloc/taker_form/taker_bloc.dart';
+import 'package:web_dex/bloc/trading_status/trading_status_bloc.dart';
 import 'package:web_dex/bloc/trading_status/trading_status_repository.dart';
 import 'package:web_dex/bloc/transaction_history/transaction_history_bloc.dart';
 import 'package:web_dex/bloc/transaction_history/transaction_history_repo.dart';
@@ -179,7 +181,6 @@ class AppBlocRoot extends StatelessWidget {
             create: (context) => CoinsBloc(
               komodoDefiSdk,
               coinsRepository,
-              mm2Api,
             )..add(CoinsStarted()),
           ),
           BlocProvider<PriceChartBloc>(
@@ -294,7 +295,12 @@ class AppBlocRoot extends StatelessWidget {
           BlocProvider<FaucetBloc>(
             create: (context) =>
                 FaucetBloc(kdfSdk: context.read<KomodoDefiSdk>()),
-          )
+          ),
+          BlocProvider<PlatformBloc>(
+            lazy: false,
+            create: (context) =>
+                PlatformBloc()..add(const PlatformInitRequested()),
+          ),
         ],
         child: _MyAppView(),
       ),
@@ -322,6 +328,9 @@ class _MyAppViewState extends State<_MyAppView> {
     routingState.selectedMenu = MainMenuValue.defaultMenu();
 
     unawaited(_hideAppLoader());
+
+    // Attempt to restore previously authenticated session
+    context.read<AuthBloc>().add(const AuthStateRestoreRequested());
 
     if (kDebugMode) {
       final walletsRepo = RepositoryProvider.of<WalletsRepository>(context);
@@ -404,7 +413,9 @@ class _MyAppViewState extends State<_MyAppView> {
 
     try {
       final stopwatch = Stopwatch()..start();
-      final availableAssetIds = sdk.assets.available.keys;
+      final availableAssetIds = sdk.assets.available.keys.where(
+        (assetId) => !excludedAssetList.contains(assetId.symbol.configSymbol),
+      );
 
       await for (final assetId in Stream.fromIterable(availableAssetIds)) {
         // TODO: Test if necessary to complete prematurely with error if build

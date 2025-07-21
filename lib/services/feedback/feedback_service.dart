@@ -3,7 +3,9 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:feedback/feedback.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:get_it/get_it.dart';
 import 'package:http/http.dart' as http;
+import 'package:komodo_defi_sdk/komodo_defi_sdk.dart';
 import 'package:komodo_defi_types/komodo_defi_type_utils.dart';
 import 'package:komodo_ui_kit/komodo_ui_kit.dart';
 import 'package:package_info_plus/package_info_plus.dart';
@@ -12,6 +14,7 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:web_dex/app_config/app_config.dart';
 
 import 'package:web_dex/generated/codegen_loader.g.dart';
+import 'package:web_dex/shared/utils/extensions/string_extensions.dart';
 
 /// Service that handles user feedback submission
 class FeedbackService {
@@ -44,8 +47,8 @@ class FeedbackService {
     final buildMode = kReleaseMode
         ? 'release'
         : kDebugMode
-        ? 'debug'
-        : (kProfileMode ? 'profile' : 'unknown');
+            ? 'debug'
+            : (kProfileMode ? 'profile' : 'unknown');
 
     // Extract contact information from the extras if provided
     String? contactMethod;
@@ -60,6 +63,9 @@ class FeedbackService {
     }
 
     final Map<String, dynamic> metadata = {
+      if (contactMethod != null) 'contactMethod': contactMethod,
+      if (contactDetails != null) 'contactDetails': contactDetails,
+
       'platform': kIsWeb ? 'web' : 'native',
       'commitHash': const String.fromEnvironment(
         'COMMIT_HASH',
@@ -68,12 +74,13 @@ class FeedbackService {
       // We don't want to expose the base URI for native builds as this could
       // contain personal information.
       'baseUrl': kIsWeb ? Uri.base.toString() : null,
-      'targetPlatform': defaultTargetPlatform.toString(),
+      'targetPlatform': defaultTargetPlatform.name,
       ...packageInfo.data,
       'mode': buildMode,
       'timestamp': DateTime.now().toIso8601String(),
-      if (contactMethod != null) 'contactMethod': contactMethod,
-      if (contactDetails != null) 'contactDetails': contactDetails,
+
+      'wallet':
+          (await GetIt.I<KomodoDefiSdk>().auth.currentUser)?.toJson() ?? 'None'
     };
 
     try {
@@ -88,8 +95,8 @@ class FeedbackService {
       final altAvailable = provider is TrelloFeedbackProvider
           ? CloudflareFeedbackProvider.fromEnvironment().isAvailable
           : provider is CloudflareFeedbackProvider
-          ? TrelloFeedbackProvider.hasEnvironmentVariables()
-          : true;
+              ? TrelloFeedbackProvider.hasEnvironmentVariables()
+              : true;
       if (kDebugMode && !altAvailable) {
         debugPrint('Failed to submit feedback: $e');
       }
@@ -110,6 +117,107 @@ abstract class FeedbackProvider {
 
   /// Returns true if this provider is configured and available for use
   bool get isAvailable;
+}
+
+/// Utility class for formatting feedback descriptions in an agent-friendly way
+class FeedbackFormatter {
+  /// Creates a properly formatted description for agent review
+  static String createAgentFriendlyDescription(
+    String description,
+    String type,
+    Map<String, dynamic> metadata,
+  ) {
+    final buffer = StringBuffer();
+
+    // Add the pre-formatted description from the form
+    buffer.writeln(description);
+    buffer.writeln();
+
+    // Technical information section
+    buffer.writeln('🔧 TECHNICAL INFORMATION:');
+    buffer.writeln('─' * 40);
+
+    // Group related metadata for better readability
+    final appInfo = <String, dynamic>{};
+    final deviceInfo = <String, dynamic>{};
+    final buildInfo = <String, dynamic>{};
+    final walletInfo = <String, dynamic>{};
+
+    for (final entry in metadata.entries) {
+      switch (entry.key) {
+        case 'contactMethod':
+        case 'contactDetails':
+          // These are already handled in the form-level formatting
+          break;
+        case 'appName':
+        case 'packageName':
+        case 'version':
+        case 'buildNumber':
+          appInfo[entry.key] = entry.value;
+          break;
+        case 'platform':
+        case 'targetPlatform':
+        case 'baseUrl':
+          deviceInfo[entry.key] = entry.value;
+          break;
+        case 'mode':
+        case 'commitHash':
+        case 'timestamp':
+          buildInfo[entry.key] = entry.value;
+          break;
+        case 'wallet':
+          walletInfo[entry.key] = entry.value;
+          break;
+        default:
+          deviceInfo[entry.key] = entry.value;
+      }
+    }
+
+    if (appInfo.isNotEmpty) {
+      buffer.writeln('   📱 App Information:');
+      appInfo.forEach(
+          (key, value) => buffer.writeln('      • ${_formatKey(key)}: $value'));
+      buffer.writeln();
+    }
+
+    if (deviceInfo.isNotEmpty) {
+      buffer.writeln('   💻 Device Information:');
+      deviceInfo.forEach(
+          (key, value) => buffer.writeln('      • ${_formatKey(key)}: $value'));
+      buffer.writeln();
+    }
+
+    if (buildInfo.isNotEmpty) {
+      buffer.writeln('   🔨 Build Information:');
+      buildInfo.forEach(
+          (key, value) => buffer.writeln('      • ${_formatKey(key)}: $value'));
+      buffer.writeln();
+    }
+
+    if (walletInfo.isNotEmpty) {
+      buffer.writeln('   👛 Wallet Information:');
+      walletInfo.forEach(
+          (key, value) => buffer.writeln('      • ${_formatKey(key)}: $value'));
+      buffer.writeln();
+    }
+
+    buffer.writeln('═══════════════════════════════════════');
+
+    return buffer.toString();
+  }
+
+  // Convert camel case to separate words
+  static String _formatKey(String key) {
+    return key
+        .replaceAllMapped(
+          RegExp(r'([a-z])([A-Z])'),
+          (Match m) => '${m[1]} ${m[2]}',
+        )
+        .replaceAll('_', ' ')
+        .toCapitalize();
+  }
+
+  // ...existing code...
 }
 
 /// Implementation of FeedbackProvider that submits feedback to Trello
@@ -159,9 +267,8 @@ class TrelloFeedbackProvider implements FeedbackProvider {
       'TRELLO_LIST_ID': const String.fromEnvironment('TRELLO_LIST_ID'),
     };
 
-    final missingVars = requiredVars.entries
-        .where((e) => e.value.isEmpty)
-        .toList();
+    final missingVars =
+        requiredVars.entries.where((e) => e.value.isEmpty).toList();
 
     if (missingVars.isNotEmpty) {
       final altAvailable =
@@ -204,23 +311,23 @@ class TrelloFeedbackProvider implements FeedbackProvider {
     required Map<String, dynamic> metadata,
   }) async {
     try {
+      // Create comprehensive formatted description for agents
+      final formattedDesc = FeedbackFormatter.createAgentFriendlyDescription(
+        description,
+        type,
+        metadata,
+      );
+
       // 1. Create the card
       final cardResponse = await http.post(
         Uri.parse('https://api.trello.com/1/cards'),
-        headers: {'Content-Type': 'application/json'},
+        headers: {'Content-Type': 'application/json; charset=utf-8'},
         body: jsonEncode({
           'idList': listId,
           'key': apiKey,
           'token': token,
           'name': 'Feedback: $type',
-          'desc':
-              '''
-Description:
-$description
-
-Device Info:
-${metadata.entries.map((e) => '${e.key}: ${e.value}').join('\n')}
-''',
+          'desc': formattedDesc,
         }),
       );
 
@@ -245,6 +352,7 @@ ${metadata.entries.map((e) => '${e.key}: ${e.value}').join('\n')}
           'file',
           screenshot,
           filename: 'screenshot.png',
+          contentType: MediaType('image', 'png'),
         ),
       );
 
@@ -347,20 +455,22 @@ class CloudflareFeedbackProvider implements FeedbackProvider {
     required Map<String, dynamic> metadata,
   }) async {
     try {
-      // Format description text exactly like in the test script
-      final formattedDesc =
-          '''
-Description:
-$description
-
-Device Info:
-${metadata.entries.map((e) => '${e.key}: ${e.value}').join('\n')}
-''';
+      // Create comprehensive formatted description for agents
+      final formattedDesc = FeedbackFormatter.createAgentFriendlyDescription(
+        description,
+        type,
+        metadata,
+      );
 
       final request = http.MultipartRequest('POST', Uri.parse(_endpoint));
 
-      request.headers.addAll({'X-KW-KEY': apiKey});
+      // Set headers including charset
+      request.headers.addAll({
+        'X-KW-KEY': apiKey,
+        'Accept-Charset': 'utf-8',
+      });
 
+      // Properly encode all string fields to ensure UTF-8 encoding
       request.fields.addAll({
         'idBoard': boardId,
         'idList': listId,
@@ -377,7 +487,9 @@ ${metadata.entries.map((e) => '${e.key}: ${e.value}').join('\n')}
         ),
       );
 
-      request.fields['metadata'] = jsonEncode(metadata);
+      // Encode metadata as JSON with proper UTF-8 handling
+      final metadataJson = metadata.toJsonString();
+      request.fields['metadata'] = metadataJson;
 
       final streamedResponse = await request.send();
       final response = await http.Response.fromStream(streamedResponse);

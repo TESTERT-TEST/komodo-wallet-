@@ -54,6 +54,13 @@ class AuthWalletDownloadRequested extends AuthBlocEvent {
   final String password;
 }
 
+/// Dispatched to restore authentication state after the SDK has been
+/// initialized. If a user session exists, the bloc will emit the
+/// appropriate [AuthBlocState].
+class AuthStateRestoreRequested extends AuthBlocEvent {
+  const AuthStateRestoreRequested();
+}
+
 class AuthTrezorInitAndAuthStarted extends AuthBlocEvent {
   const AuthTrezorInitAndAuthStarted();
 }

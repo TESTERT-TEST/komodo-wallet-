@@ -8,18 +8,18 @@ ThemeData get themeGlobalDark {
   OutlineInputBorder outlineBorderLight(Color lightAccentColor) =>
       OutlineInputBorder(
         borderSide: BorderSide(color: lightAccentColor),
-        borderRadius: BorderRadius.circular(18),
+        borderRadius: BorderRadius.circular(12),
       );
 
   //TODO! Implement all light-theme equivalent properties
   final ColorScheme colorScheme = ColorScheme.fromSeed(
     brightness: Brightness.dark,
-    seedColor: const Color.fromRGBO(61, 119, 233, 1),
-    primary: const Color.fromRGBO(61, 119, 233, 1),
-    secondary: const Color.fromRGBO(90, 104, 230, 1),
-    tertiary: const Color.fromRGBO(28, 32, 59, 1), // - @ColorScheme: Updated
-    surface: const Color.fromRGBO(22, 25, 39, 1),
-    onSurface: const Color.fromRGBO(18, 20, 32, 1),
+    seedColor: const Color(0xFF5C7FFF),
+    primary: const Color(0xFF5C7FFF),
+    // secondary: const Color(0xFF00C3AA),
+    tertiary: const Color(0xFF0A0A0A), // CORRECTED - darker for sidebar/header
+    surface: const Color(0xFF141414), // Card color (correct)
+    onSurface: const Color(0xFF000000), // Pure black main background
     error: const Color.fromRGBO(202, 78, 61, 1),
   );
 
@@ -60,7 +60,7 @@ ThemeData get themeGlobalDark {
   SnackBarThemeData snackBarThemeLight() => SnackBarThemeData(
         elevation: 12.0,
         shape: const RoundedRectangleBorder(
-          borderRadius: BorderRadius.all(Radius.circular(18)),
+          borderRadius: BorderRadius.all(Radius.circular(12)),
         ),
         behavior: SnackBarBehavior.floating,
         backgroundColor: colorScheme.primaryContainer,
@@ -81,35 +81,32 @@ ThemeData get themeGlobalDark {
     cardTheme: CardThemeData(
       color: colorScheme.surface,
       shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.all(Radius.circular(18)),
+        borderRadius: BorderRadius.all(Radius.circular(12)),
       ),
     ),
     colorScheme: colorScheme,
     primaryColor: colorScheme.primary,
-    dividerColor: const Color.fromRGBO(56, 67, 108, 1),
-    appBarTheme: AppBarTheme(color: colorScheme.surface),
+    dividerColor: const Color(0xFF1d1d1d),
+    appBarTheme: AppBarTheme(
+      color: const Color(0xFF0A0A0A), // Dark gray for header
+    ),
     iconTheme: IconThemeData(color: colorScheme.primary),
     progressIndicatorTheme: ProgressIndicatorThemeData(
       color: colorScheme.primary,
     ),
     dialogTheme: const DialogThemeData(
-      backgroundColor: Color.fromRGBO(14, 16, 27, 1),
+      backgroundColor: Color(0xFF0A0A0A),
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.all(Radius.circular(16)),
+        borderRadius: BorderRadius.all(Radius.circular(12)),
       ),
     ),
     canvasColor: colorScheme.surface,
     hintColor: const Color.fromRGBO(183, 187, 191, 1),
     snackBarTheme: snackBarThemeLight(),
     textSelectionTheme: TextSelectionThemeData(
-      cursorColor: const Color.fromRGBO(57, 161, 238, 1),
-      selectionColor: const Color.fromRGBO(
-        57,
-        161,
-        238,
-        1,
-      ).withAlpha(77), // 0.3 * 255
-      selectionHandleColor: const Color.fromRGBO(57, 161, 238, 1),
+      cursorColor: const Color(0xFF5C7FFF),
+      selectionColor: const Color(0xFF5C7FFF).withAlpha(77), // 0.3 * 255
+      selectionHandleColor: const Color(0xFF5C7FFF),
     ),
     inputDecorationTheme: InputDecorationTheme(
       enabledBorder: outlineBorderLight(Colors.transparent),
@@ -179,6 +176,7 @@ ThemeData get themeGlobalDark {
       backgroundColor: colorScheme.primary,
     ),
     textTheme: textTheme,
+
     scrollbarTheme: ScrollbarThemeData(
       thumbColor: WidgetStateProperty.all<Color?>(
         colorScheme.primary.withAlpha(204), // 0.8 * 255
@@ -197,6 +195,24 @@ ThemeData get themeGlobalDark {
       selectedLabelStyle: const TextStyle(
         fontSize: 12,
         fontWeight: FontWeight.w700,
+      ),
+    ),
+    switchTheme: SwitchThemeData(
+      trackColor: WidgetStateProperty.resolveWith<Color?>(
+        (Set<WidgetState> states) {
+          if (states.contains(WidgetState.selected)) {
+            return colorScheme.primary.withOpacity(0.5);
+          }
+          return const Color(0xFF444444);
+        },
+      ),
+      thumbColor: WidgetStateProperty.resolveWith<Color?>(
+        (Set<WidgetState> states) {
+          if (states.contains(WidgetState.selected)) {
+            return colorScheme.primary;
+          }
+          return Colors.white;
+        },
       ),
     ),
     extensions: [customTheme],
