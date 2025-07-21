@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:komodo_ui_kit/komodo_ui_kit.dart';
 import 'package:web_dex/blocs/wallets_repository.dart';
+import 'package:web_dex/dispatchers/popup_dispatcher.dart';
 import 'package:web_dex/generated/codegen_loader.g.dart';
 import 'package:web_dex/common/screen.dart';
 
@@ -43,9 +44,9 @@ Future<String?> walletRenameDialog(
                 autocorrect: false,
                 inputFormatters: [LengthLimitingTextInputFormatter(40)],
                 errorText: error,
-                onChanged: (String text) {
+                onChanged: (String? text) {
                   setState(() {
-                    error = walletsRepository.validateWalletName(text);
+                    error = walletsRepository.validateWalletName(text ?? '');
                   });
                 },
               ),
