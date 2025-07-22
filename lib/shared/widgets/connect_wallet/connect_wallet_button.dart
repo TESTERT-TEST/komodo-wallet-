@@ -97,8 +97,6 @@ class _ConnectWalletButtonState extends State<ConnectWalletButton> {
   }
 
   PopupDispatcher _createPopupDispatcher() {
-    final TakerBloc takerBloc = context.read<TakerBloc>();
-    final BridgeBloc bridgeBloc = context.read<BridgeBloc>();
 
     return PopupDispatcher(
       borderColor: theme.custom.specificButtonBorderColor,
@@ -108,6 +106,10 @@ class _ConnectWalletButtonState extends State<ConnectWalletButton> {
       popupContent: WalletsManagerWrapper(
         eventType: widget.eventType,
         onSuccess: (_) async {
+          if (!mounted) return;
+
+          final TakerBloc takerBloc = context.read<TakerBloc>();
+          final BridgeBloc bridgeBloc = context.read<BridgeBloc>();
           takerBloc.add(TakerReInit());
           bridgeBloc.add(const BridgeReInit());
           await reInitTradingForms(context);
