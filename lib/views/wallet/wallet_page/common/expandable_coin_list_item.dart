@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:komodo_defi_types/komodo_defi_types.dart';
 import 'package:komodo_ui/komodo_ui.dart';
+import 'package:komodo_ui_kit/komodo_ui_kit.dart';
 import 'package:web_dex/bloc/coins_bloc/coins_bloc.dart';
 import 'package:web_dex/bloc/trading_status/trading_status_bloc.dart';
 import 'package:web_dex/common/screen.dart';
@@ -279,9 +280,11 @@ class _AddressRow extends StatelessWidget {
         ),
         title: Row(
           children: [
-            Text(
-              pubkey.addressShort,
-              style: theme.textTheme.bodyMedium,
+            Flexible(
+              child: AutoScrollText(
+                text: pubkey.address,
+                style: theme.textTheme.bodyMedium,
+              ),
             ),
             const SizedBox(width: 8),
             Material(
@@ -309,11 +312,11 @@ class _AddressRow extends StatelessWidget {
                     borderRadius: BorderRadius.circular(16.0),
                   ),
                   child: Text(
-                    LocaleKeys.dexAddress.tr(),
+                    LocaleKeys.tradingAddress.tr(),
                     style: TextStyle(fontSize: isMobile ? 9 : 12),
                   ),
                 ),
-              )                            
+              )
             ],
           ],
         ),
