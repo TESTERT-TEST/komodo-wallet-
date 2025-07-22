@@ -1,6 +1,10 @@
+import 'dart:async';
+
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:komodo_defi_sdk/komodo_defi_sdk.dart';
+import 'package:komodo_defi_types/komodo_defi_types.dart';
 import 'package:komodo_ui_kit/komodo_ui_kit.dart';
 import 'package:web_dex/analytics/events/user_acquisition_events.dart';
 import 'package:web_dex/bloc/analytics/analytics_bloc.dart';
@@ -46,6 +50,7 @@ class _IguanaWalletsManagerState extends State<IguanaWalletsManager> {
   WalletsManagerExistWalletAction _existWalletAction =
       WalletsManagerExistWalletAction.none;
   bool _initialHdMode = false;
+  StreamSubscription<KdfUser?>? _authStateSubscription;
 
   @override
   void initState() {
@@ -57,6 +62,12 @@ class _IguanaWalletsManagerState extends State<IguanaWalletsManager> {
     if (_selectedWallet != null) {
       _existWalletAction = WalletsManagerExistWalletAction.logIn;
     }
+  }
+
+  @override
+  void dispose() {
+    _authStateSubscription?.cancel();
+    super.dispose();
   }
 
   @override
@@ -292,11 +303,13 @@ class _IguanaWalletsManagerState extends State<IguanaWalletsManager> {
     }
   }
 
-  void _onLogIn() {
+  Future<void> _onLogIn() async {
     final currentUser = context.read<AuthBloc>().state.currentUser;
     final currentWallet = currentUser?.wallet;
+    final coinsBloc = context.read<CoinsBloc>();
     final action = _action;
     _action = WalletsManagerAction.none;
+
     if (currentUser != null && currentWallet != null) {
       final analyticsBloc = context.read<AnalyticsBloc>();
       final source = isMobile ? 'mobile' : 'desktop';
@@ -314,7 +327,12 @@ class _IguanaWalletsManagerState extends State<IguanaWalletsManager> {
           ),
         );
       }
-      context.read<CoinsBloc>().add(CoinsSessionStarted(currentUser));
+
+      // Wait for SDK authentication state to stabilize before activating coins
+      // This fixes the race condition where currentUser exists but the SDK's
+      // authentication stream hasn't fully propagated the change yet
+      await _waitForAuthenticationReady(currentUser, coinsBloc);
+
       widget.onSuccess(currentWallet);
     }
 
@@ -323,5 +341,61 @@ class _IguanaWalletsManagerState extends State<IguanaWalletsManager> {
         _isLoading = false;
       });
     }
+  }
+
+  /// Waits for the SDK authentication state to be fully ready using the auth stream.
+  /// This is more reliable than polling as it listens to the actual auth state changes.
+  Future<void> _waitForAuthenticationReady(
+    KdfUser expectedUser,
+    CoinsBloc coinsBloc,
+  ) async {
+    // Get the SDK instance before the async operations
+    late final KomodoDefiSdk sdk;
+    try {
+      sdk = context.read<KomodoDefiSdk>();
+    } catch (e) {
+      // If we can't get the SDK instance, proceed with immediate activation
+      coinsBloc.add(CoinsSessionStarted(expectedUser));
+      return;
+    }
+
+    // Create a completer to handle the auth state verification
+    final completer = Completer<void>();
+
+    // Listen to auth state changes and complete when ready
+    _authStateSubscription = sdk.auth.watchCurrentUser().listen(
+      (user) {
+        if (user != null && user.walletId.name == expectedUser.walletId.name) {
+          // Auth state is ready, activate coins
+          if (!completer.isCompleted) {
+            coinsBloc.add(CoinsSessionStarted(user));
+            completer.complete();
+          }
+        }
+      },
+      onError: (error) {
+        // On error, proceed with immediate activation as fallback
+        if (!completer.isCompleted) {
+          coinsBloc.add(CoinsSessionStarted(expectedUser));
+          completer.complete();
+        }
+      },
+    );
+
+    // Set a timeout to avoid waiting indefinitely
+    Timer(const Duration(seconds: 2), () {
+      if (!completer.isCompleted) {
+        // Timeout reached, proceed with immediate activation
+        coinsBloc.add(CoinsSessionStarted(expectedUser));
+        completer.complete();
+      }
+    });
+
+    // Wait for either the auth state to be ready or timeout
+    await completer.future;
+
+    // Clean up the subscription
+    await _authStateSubscription?.cancel();
+    _authStateSubscription = null;
   }
 }
