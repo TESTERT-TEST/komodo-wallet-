@@ -202,15 +202,22 @@ class _TransactionListRowState extends State<TransactionListRow> {
       mainAxisSize: MainAxisSize.max,
       children: [
         SizedBox(width: 8),
-        SizedBox(
-          width: 380,
-          child: _TransactionAddress(
-            transaction: widget.transaction,
-            coinAbbr: widget.coinAbbr,
+        Flexible(
+          flex: 6,
+          child: Container(
+            constraints: const BoxConstraints(maxWidth: 415),
+            alignment: Alignment.centerLeft,
+            child: _TransactionAddress(
+              transaction: widget.transaction,
+              coinAbbr: widget.coinAbbr,
+            ),
           ),
         ),
-        Expanded(
-          flex: 4,
+        SizedBox(width: 16),
+        Container(
+          margin: const EdgeInsets.symmetric(horizontal: 8),
+          alignment: Alignment.centerLeft,
+          width: 60,
           child: Text(
             _isReceived ? LocaleKeys.receive.tr() : LocaleKeys.send.tr(),
             style: const TextStyle(
@@ -276,6 +283,13 @@ class _TransactionListRowState extends State<TransactionListRow> {
   }
 }
 
+extension _TransactionExtension on Transaction {
+  String get myAddress {
+    List<String> addressList = isIncoming ? to : from;
+    return addressList.isNotEmpty ? addressList.first : LocaleKeys.unknown.tr();
+  }
+}
+
 class _TransactionAddress extends StatelessWidget {
   const _TransactionAddress({
     required this.transaction,
@@ -287,36 +301,19 @@ class _TransactionAddress extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    String myAddress;
-    List<String> addressList =
-        transaction.isIncoming ? transaction.to : transaction.from;
-
-    if (addressList.isNotEmpty) {
-      myAddress = addressList.first;
-    } else {
-      myAddress = LocaleKeys.unknown.tr();
-    }
-
     return Row(
-      spacing: 8,
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      mainAxisSize: MainAxisSize.min,
       children: [
-        Flexible(
-          child: Row(
-            spacing: 8,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              AddressIcon(address: myAddress),
-              Expanded(
-                child: AutoScrollText(
-                  text: myAddress,
-                  style: const TextStyle(fontSize: 14),
-                ),
-              ),
-            ],
+        AddressIcon(address: transaction.myAddress),
+        const SizedBox(width: 8),
+        Expanded(
+          child: AutoScrollText(
+            text: transaction.myAddress,
+            style: Theme.of(context).textTheme.bodySmall,
           ),
         ),
-        AddressCopyButton(address: myAddress),
+        const SizedBox(width: 4),
+        AddressCopyButton(address: transaction.myAddress),
       ],
     );
   }
