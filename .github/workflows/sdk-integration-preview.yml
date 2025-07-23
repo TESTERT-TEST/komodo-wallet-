@@ -17,7 +17,7 @@ on:
         type: string
 
 jobs:
-  build_and_preview:
+  sdk_integration_preview:
     runs-on: ubuntu-latest
     outputs:
       preview_url: ${{ steps.firebase_deploy.outputs.details_url }}
