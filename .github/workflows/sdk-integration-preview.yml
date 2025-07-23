@@ -7,7 +7,7 @@ name: Deploy SDK Integration Preview
 run-name: ${{ github.actor }} is deploying SDK integration preview with API branch '${{ inputs.api_branch }}' via ${{ inputs.deployment_method }} 🚀
 
 permissions:
-  contents: read
+  contents: write
   pages: write
   id-token: write
 
