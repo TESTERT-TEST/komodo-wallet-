@@ -1,6 +1,15 @@
 # Deploy a preview build with SDK integration for testing KDF API changes
+# This workflow supports multiple deployment methods with user control:
+# - AUTO: Use Firebase if configured, automatically fallback to GitHub Pages if not
+# - FIREBASE: Force Firebase deployment (will fail if service account not configured)
+# - GITHUB_PAGES: Force GitHub Pages deployment (⚠️ WARNING: Will overwrite existing GitHub Pages!)
 name: Deploy SDK Integration Preview
-run-name: ${{ github.actor }} is deploying SDK integration preview with API branch '${{ inputs.api_branch }}' 🚀
+run-name: ${{ github.actor }} is deploying SDK integration preview with API branch '${{ inputs.api_branch }}' via ${{ inputs.deployment_method }} 🚀
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
 
 on:
   workflow_dispatch:
@@ -15,13 +24,32 @@ on:
         required: false
         default: "dev"
         type: string
+      coins_repo_branch:
+        description: "Coins repository branch to use (optional, defaults to master)"
+        required: false
+        default: "master"
+        type: string
+      deployment_method:
+        description: "⚠️ DEPLOYMENT METHOD: Choose deployment target. AUTO: Use Firebase if configured, fallback to GitHub Pages. FIREBASE: Force Firebase (will fail if not configured). GITHUB_PAGES: ⚠️ WARNING: Will OVERWRITE existing GitHub Pages deployment of this repository! Use only if you understand the consequences."
+        required: false
+        default: "auto"
+        type: choice
+        options:
+          - "auto"
+          - "firebase"
+          - "github_pages"
 
 jobs:
   sdk_integration_preview:
     runs-on: ubuntu-latest
     outputs:
-      preview_url: ${{ steps.firebase_deploy.outputs.details_url }}
-      channel_id: ${{ steps.get_preview_channel_id.outputs.preview_channel_id }}
+      preview_url: ${{ steps.deploy_result.outputs.preview_url }}
+      channel_id: ${{ steps.deploy_result.outputs.channel_id }}
+      deployment_method: ${{ steps.deploy_result.outputs.deployment_method }}
+      deployment_method_input: ${{ inputs.deployment_method }}
+      api_branch: ${{ inputs.api_branch }}
+      sdk_branch: ${{ inputs.sdk_branch }}
+      coins_branch: ${{ inputs.coins_repo_branch }}
 
     steps:
       - name: Shortify commit sha
@@ -79,6 +107,40 @@ jobs:
             echo "Warning: update_api_config.dart script not found at packages/komodo_wallet_cli/bin/update_api_config.dart"
             echo "Available files in packages/komodo_wallet_cli/bin/:"
             ls -la packages/komodo_wallet_cli/bin/ || echo "Directory not found"
+          fi
+
+      - name: Update coins configuration
+        shell: bash
+        run: |
+          echo "Updating coins configuration to use branch: ${{ inputs.coins_repo_branch }}"
+
+          # Update the build config file to use the specified coins repo branch
+          if [ -f "sdk/packages/komodo_defi_framework/app_build/build_config.json" ]; then
+            echo "Updating build_config.json to use coins branch: ${{ inputs.coins_repo_branch }}"
+            
+            # Create backup
+            cp sdk/packages/komodo_defi_framework/app_build/build_config.json sdk/packages/komodo_defi_framework/app_build/build_config.json.backup
+            
+            # Update the coins repo branch using jq
+            jq --arg branch "${{ inputs.coins_repo_branch }}" \
+              '.coins.coins_repo_branch = $branch' \
+              sdk/packages/komodo_defi_framework/app_build/build_config.json > temp_config.json && \
+              mv temp_config.json sdk/packages/komodo_defi_framework/app_build/build_config.json
+            
+            # Update CDN mirrors if the branch is master or main
+            if [[ "${{ inputs.coins_repo_branch }}" == "master" || "${{ inputs.coins_repo_branch }}" == "main" ]]; then
+              echo "Adding CDN mirror for branch: ${{ inputs.coins_repo_branch }}"
+              jq --arg branch "${{ inputs.coins_repo_branch }}" \
+                '.coins.cdn_branch_mirrors[$branch] = "https://komodoplatform.github.io/coins"' \
+                sdk/packages/komodo_defi_framework/app_build/build_config.json > temp_config.json && \
+                mv temp_config.json sdk/packages/komodo_defi_framework/app_build/build_config.json
+            fi
+            
+            echo "Updated build_config.json with coins branch: ${{ inputs.coins_repo_branch }}"
+            echo "=== Coins configuration ==="
+            jq '.coins' sdk/packages/komodo_defi_framework/app_build/build_config.json
+          else
+            echo "Warning: build_config.json not found, using default coins configuration"
           fi
 
       - name: Update pubspec.yaml to use local SDK paths
@@ -150,8 +212,58 @@ jobs:
       - name: Validate build
         uses: ./.github/actions/validate-build
 
-      - name: Deploy SDK Integration Preview (Expires in 7 days)
+      - name: Determine deployment method
+        id: check_deployment
+        shell: bash
+        run: |
+          echo "🎯 Deployment method input: ${{ inputs.deployment_method }}"
+
+          # Check if Firebase is configured
+          if [ -n "${{ secrets.FIREBASE_SERVICE_ACCOUNT_KOMODO_WALLET_OFFICIAL }}" ]; then
+            firebase_available=true
+            echo "✅ Firebase service account is configured and available"
+          else
+            firebase_available=false
+            echo "❌ Firebase service account is not configured"
+          fi
+
+          # Determine final deployment method based on user input and Firebase availability
+          case "${{ inputs.deployment_method }}" in
+            "auto")
+              if [ "$firebase_available" = true ]; then
+                echo "deployment_method=firebase" >> $GITHUB_OUTPUT
+                echo "🔥 AUTO mode: Using Firebase (available and configured)"
+              else
+                echo "deployment_method=github_pages" >> $GITHUB_OUTPUT
+                echo "📄 AUTO mode: Using GitHub Pages (Firebase not available)"
+              fi
+              ;;
+            "firebase")
+              if [ "$firebase_available" = true ]; then
+                echo "deployment_method=firebase" >> $GITHUB_OUTPUT
+                echo "🔥 FIREBASE mode: Using Firebase (forced by user)"
+              else
+                echo "❌ ERROR: Firebase deployment requested but service account not configured!"
+                echo "Please configure FIREBASE_SERVICE_ACCOUNT_KOMODO_WALLET_OFFICIAL secret or choose a different deployment method."
+                exit 1
+              fi
+              ;;
+            "github_pages")
+              echo "deployment_method=github_pages" >> $GITHUB_OUTPUT
+              echo "⚠️  GITHUB_PAGES mode: Using GitHub Pages (forced by user)"
+              echo "⚠️  WARNING: This will overwrite any existing GitHub Pages deployment!"
+              ;;
+            *)
+              echo "❌ ERROR: Invalid deployment method: ${{ inputs.deployment_method }}"
+              exit 1
+              ;;
+          esac
+
+          echo "✅ Final deployment method: $(cat $GITHUB_OUTPUT | grep deployment_method | cut -d'=' -f2)"
+
+      - name: Deploy SDK Integration Preview with Firebase (Expires in 7 days)
         id: firebase_deploy
+        if: steps.check_deployment.outputs.deployment_method == 'firebase'
         uses: FirebaseExtended/action-hosting-deploy@v0.7.1
         with:
           repoToken: "${{ secrets.GITHUB_TOKEN }}"
@@ -161,15 +273,132 @@ jobs:
           expires: 7d
           projectId: komodo-wallet-official
 
+      - name: Announce Firebase deployment
+        if: steps.check_deployment.outputs.deployment_method == 'firebase'
+        shell: bash
+        run: |
+          echo "::notice title=🔥 Firebase Preview Deployed::Preview URL: ${{ steps.firebase_deploy.outputs.details_url }}"
+
+      - name: Prepare GitHub Pages deployment
+        id: prepare_pages
+        if: steps.check_deployment.outputs.deployment_method == 'github_pages'
+        shell: bash
+        run: |
+          echo "Preparing build for GitHub Pages deployment..."
+
+          # Create a deployment directory
+          mkdir -p pages-deploy
+
+          # Copy build output to deployment directory
+          cp -r build/web/* pages-deploy/
+
+          # Create index.html if it doesn't exist (fallback)
+          if [ ! -f "pages-deploy/index.html" ]; then
+            echo "Creating fallback index.html"
+            echo '<!DOCTYPE html>' > pages-deploy/index.html
+            echo '<html>' >> pages-deploy/index.html
+            echo '<head>' >> pages-deploy/index.html
+            echo '    <meta charset="UTF-8">' >> pages-deploy/index.html
+            echo '    <title>Komodo Wallet SDK Integration Preview</title>' >> pages-deploy/index.html
+            echo '    <meta name="viewport" content="width=device-width, initial-scale=1.0">' >> pages-deploy/index.html
+            echo '</head>' >> pages-deploy/index.html
+            echo '<body>' >> pages-deploy/index.html
+            echo '    <h1>Komodo Wallet SDK Integration Preview</h1>' >> pages-deploy/index.html
+            echo '    <p>This is a preview build with SDK integration.</p>' >> pages-deploy/index.html
+            echo "    <p>API Branch: ${{ inputs.api_branch }}</p>" >> pages-deploy/index.html
+            echo "    <p>SDK Branch: ${{ inputs.sdk_branch }}</p>" >> pages-deploy/index.html
+            echo "    <p>Coins Branch: ${{ inputs.coins_repo_branch }}</p>" >> pages-deploy/index.html
+            echo '</body>' >> pages-deploy/index.html
+            echo '</html>' >> pages-deploy/index.html
+          fi
+
+          # Create .nojekyll file to prevent GitHub Pages from processing files starting with _
+          touch pages-deploy/.nojekyll
+
+          echo "GitHub Pages deployment prepared"
+          ls -la pages-deploy/
+
+      - name: Deploy to GitHub Pages
+        id: pages_deploy
+        if: steps.check_deployment.outputs.deployment_method == 'github_pages'
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./pages-deploy
+          publish_branch: gh-pages
+          destination_dir: sdk-integration/${{ steps.get_preview_channel_id.outputs.preview_channel_id }}
+          force_orphan: false
+
+      - name: Announce GitHub Pages deployment
+        if: steps.check_deployment.outputs.deployment_method == 'github_pages'
+        shell: bash
+        run: |
+          PAGES_URL="https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/sdk-integration/${{ steps.get_preview_channel_id.outputs.preview_channel_id }}/"
+          echo "::notice title=📄 GitHub Pages Preview Deployed::Preview URL: $PAGES_URL"
+
+      - name: Set deployment result
+        id: deploy_result
+        shell: bash
+        run: |
+          if [ "${{ steps.check_deployment.outputs.deployment_method }}" == "firebase" ]; then
+            echo "deployment_method=firebase" >> $GITHUB_OUTPUT
+            echo "preview_url=${{ steps.firebase_deploy.outputs.details_url }}" >> $GITHUB_OUTPUT
+            echo "channel_id=${{ steps.get_preview_channel_id.outputs.preview_channel_id }}" >> $GITHUB_OUTPUT
+          else
+            echo "deployment_method=github_pages" >> $GITHUB_OUTPUT
+            echo "preview_url=https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/sdk-integration/${{ steps.get_preview_channel_id.outputs.preview_channel_id }}/" >> $GITHUB_OUTPUT
+            echo "channel_id=${{ steps.get_preview_channel_id.outputs.preview_channel_id }}" >> $GITHUB_OUTPUT
+          fi
+
       - name: Display deployment information
         shell: bash
         run: |
           echo "🚀 SDK Integration Preview deployed successfully!"
           echo "📦 SDK Branch: ${{ inputs.sdk_branch }}"
           echo "🔧 API Branch: ${{ inputs.api_branch }}"
-          echo "� Channel ID: ${{ steps.get_preview_channel_id.outputs.preview_channel_id }}"
-          echo "🌐 Preview URL: ${{ steps.firebase_deploy.outputs.details_url }}"
-          echo "⏰ Preview expires in 7 days"
-          echo ""
-          echo "You can access your preview at:"
-          echo "${{ steps.firebase_deploy.outputs.details_url }}"
+          echo "🪙 Coins Branch: ${{ inputs.coins_repo_branch }}"
+          echo "⚙️ Deployment Method Choice: ${{ inputs.deployment_method }}"
+          echo "🏗️ Actual Deployment Method: ${{ steps.deploy_result.outputs.deployment_method }}"
+          echo "🆔 Channel ID: ${{ steps.deploy_result.outputs.channel_id }}"
+          echo "🌐 Preview URL: ${{ steps.deploy_result.outputs.preview_url }}"
+
+          if [ "${{ steps.deploy_result.outputs.deployment_method }}" == "firebase" ]; then
+            echo "⏰ Preview expires in 7 days"
+            echo ""
+            echo "Your Firebase preview is available at:"
+          else
+            echo "📄 Deployed via GitHub Pages"
+            if [ "${{ inputs.deployment_method }}" == "github_pages" ]; then
+              echo "⚠️ WARNING: This deployment may have overwritten existing GitHub Pages content"
+            fi
+            echo ""
+            echo "Your GitHub Pages preview is available at:"
+          fi
+          echo "${{ steps.deploy_result.outputs.preview_url }}"
+
+          # Create GitHub Actions step summary for prominent display
+          echo "## 🚀 SDK Integration Preview Deployed" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Preview URL" >> $GITHUB_STEP_SUMMARY
+          echo "**[${{ steps.deploy_result.outputs.preview_url }}](${{ steps.deploy_result.outputs.preview_url }})**" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Configuration" >> $GITHUB_STEP_SUMMARY
+          echo "- **API Branch:** \`${{ inputs.api_branch }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "- **SDK Branch:** \`${{ inputs.sdk_branch }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "- **Coins Branch:** \`${{ inputs.coins_repo_branch }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "- **Deployment Method Choice:** \`${{ inputs.deployment_method }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "- **Actual Deployment Method:** \`${{ steps.deploy_result.outputs.deployment_method }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "- **Channel ID:** \`${{ steps.deploy_result.outputs.channel_id }}\`" >> $GITHUB_STEP_SUMMARY
+
+          if [ "${{ steps.deploy_result.outputs.deployment_method }}" == "firebase" ]; then
+            echo "- **Expiration:** 7 days" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "- **Hosting:** GitHub Pages" >> $GITHUB_STEP_SUMMARY
+            if [ "${{ inputs.deployment_method }}" == "github_pages" ]; then
+              echo "" >> $GITHUB_STEP_SUMMARY
+              echo "⚠️ **WARNING:** This deployment used GitHub Pages and may have overwritten existing content." >> $GITHUB_STEP_SUMMARY
+            fi
+          fi
+
+          # Add a notice annotation for the URL
+          echo "::notice title=🌐 Preview Deployed::Preview URL: ${{ steps.deploy_result.outputs.preview_url }}"
