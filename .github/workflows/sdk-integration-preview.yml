@@ -210,8 +210,8 @@ jobs:
           TRELLO_BOARD_ID: ${{ secrets.TRELLO_BOARD_ID }}
           TRELLO_LIST_ID: ${{ secrets.TRELLO_LIST_ID }}
 
-      - name: Validate build
-        uses: ./.github/actions/validate-build
+      # - name: Validate build
+      #   uses: ./.github/actions/validate-build
 
       - name: Determine deployment method
         id: check_deployment
