@@ -68,7 +68,12 @@ jobs:
             cd ../..
             
             # Run the update script with the API branch
-            dart run packages/komodo_wallet_cli/bin/update_api_config.dart ${{ inputs.api_branch }}
+            dart run packages/komodo_wallet_cli/bin/update_api_config.dart \
+              --branch ${{ inputs.api_branch }} \
+              --source mirror \
+              --config packages/komodo_defi_framework/app_build/build_config.json \
+              --output-dir packages/komodo_defi_framework/app_build/temp_downloads \
+              --verbose
             echo "KDF API configuration updated successfully"
           else
             echo "Warning: update_api_config.dart script not found at packages/komodo_wallet_cli/bin/update_api_config.dart"
@@ -123,6 +128,11 @@ jobs:
 
           echo "=== UI Kit pubspec.yaml SDK dependencies ==="
           grep -A2 -B1 "komodo_.*:" packages/komodo_ui_kit/pubspec.yaml | grep -A2 -B1 "path: ../../sdk"
+
+      - name: Fetch SDK packages
+        run: |
+          echo "Fetching KDF SDK packages..."
+          flutter pub get -C . || echo "Failed to fetch KDF SDK packages, continuing..."
 
       - name: Fetch packages and generate assets
         uses: ./.github/actions/generate-assets
