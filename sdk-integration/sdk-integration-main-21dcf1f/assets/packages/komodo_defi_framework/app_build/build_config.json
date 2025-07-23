@@ -1,0 +1,85 @@
+{
+    "api": {
+        "api_commit_hash": "fbab8ec85d65f3bb014d894eabd98717f97ec29a",
+        "branch": "main",
+        "fetch_at_build_enabled": true,
+        "concurrent_downloads_enabled": true,
+        "source_urls": [
+            "https://api.github.com/repos/KomodoPlatform/komodo-defi-framework",
+            "https://sdk.devbuilds.komodo.earth/"
+        ],
+        "platforms": {
+            "web": {
+                "matching_pattern": "^(?:kdf_[a-f0-9]{7,40}-wasm|mm2_[a-f0-9]{7,40}-wasm|mm2-[a-f0-9]{7,40}-wasm)\\.zip$",
+                "valid_zip_sha256_checksums": [
+                    "e13898bb987c44ff45ad47f3586445b6e55c693fd8a257081a2866ecf91cb1b7"
+                ],
+                "path": "web/kdf/bin"
+            },
+            "ios": {
+                "matching_pattern": "^(?:kdf_[a-f0-9]{7,40}-ios-aarch64|mm2_[a-f0-9]{7,40}-ios-aarch64|mm2-[a-f0-9]{7,40}-ios-aarch64-CI)\\.zip$",
+                "valid_zip_sha256_checksums": [
+                    "e2ac6e67b3ea5ca5330f6766d8d3c31e6be9debc66cbbba1fe1e5c97372e80f2"
+                ],
+                "path": "ios"
+            },
+            "macos": {
+                "matching_pattern": "^(?:kdf_[a-f0-9]{7,40}-mac-arm64|mm2-[a-f0-9]{7,40}-Darwin-Release)\\.zip$",
+                "valid_zip_sha256_checksums": [
+                    "5e3898912bf1740c309cdd20d0ded70820eef832c03c01ea3e37275b67ecf074"
+                ],
+                "path": "macos/bin"
+            },
+            "windows": {
+                "matching_pattern": "^(?:kdf_[a-f0-9]{7,40}-win-x86-64|mm2_[a-f0-9]{7,40}-win-x86-64|mm2-[a-f0-9]{7,40}-Win64)\\.zip$",
+                "valid_zip_sha256_checksums": [
+                    "af9f93099d73405eb644ba99f8ed752873b3b388b0ca05ac8da8bf2c47c11ea2"
+                ],
+                "path": "windows/bin"
+            },
+            "android-armv7": {
+                "matching_pattern": "^(?:kdf_[a-f0-9]{7,40}-android-armv7|mm2_[a-f0-9]{7,40}-android-armv7|mm2-[a-f0-9]{7,40}-android-armv7-CI)\\.zip$",
+                "valid_zip_sha256_checksums": [
+                    "42d183e1ca7b6a66ea8bc7bb89c78ff4f74a988db543f83a4512fa136ab00979"
+                ],
+                "path": "android/app/src/main/cpp/libs/armeabi-v7a"
+            },
+            "android-aarch64": {
+                "matching_pattern": "^(?:kdf_[a-f0-9]{7,40}-android-aarch64|mm2_[a-f0-9]{7,40}-android-aarch64|mm2-[a-f0-9]{7,40}-android-aarch64-CI)\\.zip$",
+                "valid_zip_sha256_checksums": [
+                    "0d58281f6a332d132f1c0e75d6484d6432c67214a6a1e4921bd19b30d535a14b"
+                ],
+                "path": "android/app/src/main/cpp/libs/arm64-v8a"
+            },
+            "linux": {
+                "matching_pattern": "^(?:kdf_[a-f0-9]{7,40}-linux-x86-64|mm2_[a-f0-9]{7,40}-linux-x86-64|mm2-[a-f0-9]{7,40}-Linux-Release)\\.zip$",
+                "valid_zip_sha256_checksums": [
+                    "65e0ba2c5a13c03971607ebb9f3acc55f75bc89dd3e2178e94acb39bfcd35d4e"
+                ],
+                "path": "linux/bin"
+            }
+        }
+    },
+    "coins": {
+        "fetch_at_build_enabled": true,
+        "update_commit_on_build": true,
+        "bundled_coins_repo_commit": "c30b5d80cceb42353134f0751bda705e74c41e81",
+        "coins_repo_api_url": "https://api.github.com/repos/KomodoPlatform/coins",
+        "coins_repo_content_url": "https://komodoplatform.github.io/coins",
+        "coins_repo_branch": "master",
+        "runtime_updates_enabled": true,
+        "mapped_files": {
+            "assets/config/coins_config.json": "utils/coins_config_unfiltered.json",
+            "assets/config/coins.json": "coins",
+            "assets/config/seed_nodes.json": "seed-nodes.json"
+        },
+        "mapped_folders": {
+            "assets/coin_icons/png/": "icons"
+        },
+        "concurrent_downloads_enabled": true,
+        "cdn_branch_mirrors": {
+            "master": "https://komodoplatform.github.io/coins",
+            "main": "https://komodoplatform.github.io/coins"
+        }
+    }
+}
