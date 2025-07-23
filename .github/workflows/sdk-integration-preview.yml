@@ -42,6 +42,9 @@ jobs:
       - name: Setup GH Actions
         uses: actions/checkout@v4
 
+      - name: Install Flutter and dependencies
+        uses: ./.github/actions/flutter-deps
+
       - name: Clone SDK repository
         shell: bash
         run: |
@@ -120,9 +123,6 @@ jobs:
 
           echo "=== UI Kit pubspec.yaml SDK dependencies ==="
           grep -A2 -B1 "komodo_.*:" packages/komodo_ui_kit/pubspec.yaml | grep -A2 -B1 "path: ../../sdk"
-
-      - name: Install Flutter and dependencies
-        uses: ./.github/actions/flutter-deps
 
       - name: Fetch packages and generate assets
         uses: ./.github/actions/generate-assets
