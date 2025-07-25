@@ -3,8 +3,21 @@ import 'dart:typed_data';
 
 import 'package:crypto/crypto.dart';
 import 'package:encrypt/encrypt.dart';
+import 'package:web_dex/shared/utils/legacy_desktop_decryption.dart';
 
 class EncryptionTool {
+  LegacyDesktopDecryption? _legacyDecryption;
+
+  EncryptionTool() {
+    try {
+      _legacyDecryption = LegacyDesktopDecryption();
+    } catch (e) {
+      // Legacy decryption not available on this platform
+      // Will fall back to standard decryption methods
+      _legacyDecryption = null;
+    }
+  }
+
   /// Encrypts the provided [data] using AES encryption with the given [password].
   ///
   /// Parameters:
@@ -43,9 +56,13 @@ class EncryptionTool {
   /// Decrypts the provided [encryptedData] using AES decryption with the given [password].
   /// The method attempts to decode the [encryptedData] as a JSON-encoded string
   /// containing encrypted data and initialization vectors (IVs).
+  ///
+  /// Also supports legacy desktop wallet format encrypted with XChaCha20-Poly1305.
+  ///
   /// Parameters:
   /// - [password] (String): The password used for decryption key derivation.
-  /// - [encryptedData] (String): The JSON-encoded string containing encrypted data and IVs.
+  /// - [encryptedData] (String): The JSON-encoded string containing encrypted data and IVs,
+  ///   or legacy desktop wallet encrypted data.
   ///
   /// Return Value:
   /// - Future<String?>: The decrypted data, or `null` if decryption fails.
@@ -73,7 +90,85 @@ class EncryptionTool {
 
       return decrypted;
     } catch (_) {
-      return _decryptLegacy(password, encryptedData);
+      // Try legacy desktop format if standard decryption fails
+      return _decryptLegacyData(password, encryptedData);
+    }
+  }
+
+  /// Attempts to decrypt legacy desktop wallet data
+  String? _decryptLegacyData(String password, String encryptedData) {
+    // First try the old AES legacy format
+    final legacyResult = _decryptLegacy(password, encryptedData);
+    if (legacyResult != null) {
+      return legacyResult;
+    }
+
+    // Try legacy desktop XChaCha20-Poly1305 format
+    try {
+      final dataBytes = _tryDecodeAsBytes(encryptedData);
+      if (dataBytes != null &&
+          _legacyDecryption?.isLegacyFormat(dataBytes) == true) {
+        return _legacyDecryption!.decryptLegacySeed(password, dataBytes);
+      }
+    } catch (e) {
+      // Legacy decryption not available or failed
+    }
+
+    return null;
+  }
+
+  /// Tries to decode string data as bytes for legacy format detection
+  Uint8List? _tryDecodeAsBytes(String data) {
+    try {
+      // Try base64 decode first
+      return base64.decode(data);
+    } catch (e) {
+      try {
+        // Try treating as hex string
+        if (data.length % 2 == 0) {
+          final bytes = <int>[];
+          for (int i = 0; i < data.length; i += 2) {
+            final hexByte = data.substring(i, i + 2);
+            bytes.add(int.parse(hexByte, radix: 16));
+          }
+          return Uint8List.fromList(bytes);
+        }
+      } catch (e) {
+        // Try UTF-8 encoding as last resort
+        try {
+          return Uint8List.fromList(utf8.encode(data));
+        } catch (e) {
+          return null;
+        }
+      }
+    }
+    return null;
+  }
+
+  /// Supports decryption from file bytes for legacy desktop wallets
+  Future<String?> decryptDataFromBytes(
+      String password, Uint8List encryptedBytes) async {
+    try {
+      // Check if it's legacy desktop format
+      if (isLegacyDesktopFormat(encryptedBytes)) {
+        return _legacyDecryption!.decryptLegacySeed(password, encryptedBytes);
+      }
+
+      // Try to decode as string and use standard decryption
+      final dataString = utf8.decode(encryptedBytes, allowMalformed: true);
+      return await decryptData(password, dataString);
+    } catch (e) {
+      return null;
+    }
+  }
+
+  /// Checks if the provided data is in legacy desktop format
+  bool isLegacyDesktopFormat(Uint8List fileData) {
+    try {
+      return _legacyDecryption?.isLegacyFormat(fileData) ?? false;
+    } catch (e) {
+      // Legacy decryption not available
+      return false;
     }
   }
 
