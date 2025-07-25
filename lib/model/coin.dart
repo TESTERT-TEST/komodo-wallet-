@@ -78,6 +78,9 @@ class Coin {
   final CoinMode mode;
   CoinState state;
 
+  // Cache for expensive computed properties
+  String? _cachedTypeName;
+
   bool get walletOnly => _walletOnly || appWalletOnlyAssetList.contains(abbr);
 
   String? get swapContractAddress =>
@@ -91,7 +94,9 @@ class Coin {
       '$_urgentDeprecationNotice Use the SDK\'s Asset.sendableBalance instead. This value is not updated after initial load and may be inaccurate.')
   double sendableBalance = 0;
 
-  String get typeName => getCoinTypeName(type);
+  String get typeName {
+    return _cachedTypeName ??= getCoinTypeName(type, abbr);
+  }
   String get typeNameWithTestnet => typeName + (isTestCoin ? ' (TESTNET)' : '');
 
   bool get isIrisToken => protocolType == 'TENDERMINTTOKEN';
