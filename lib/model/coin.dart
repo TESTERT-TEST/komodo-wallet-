@@ -80,6 +80,7 @@ class Coin {
 
   // Cache for expensive computed properties
   String? _cachedTypeName;
+  bool? _cachedisParent;
 
   bool get walletOnly => _walletOnly || appWalletOnlyAssetList.contains(abbr);
 
@@ -97,6 +98,11 @@ class Coin {
   String get typeName {
     return _cachedTypeName ??= getCoinTypeName(type, abbr);
   }
+  
+  bool get isParent {
+    return _cachedisParent ??= isParentCoin(type, abbr);
+  }
+  
   String get typeNameWithTestnet => typeName + (isTestCoin ? ' (TESTNET)' : '');
 
   bool get isIrisToken => protocolType == 'TENDERMINTTOKEN';
