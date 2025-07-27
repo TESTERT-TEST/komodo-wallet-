@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:komodo_defi_sdk/komodo_defi_sdk.dart';
+import 'package:komodo_defi_types/komodo_defi_types.dart';
 import 'package:web_dex/bloc/coins_bloc/coins_bloc.dart';
 import 'package:web_dex/bloc/security_settings/security_settings_bloc.dart';
 import 'package:web_dex/bloc/security_settings/security_settings_event.dart';
@@ -9,7 +10,6 @@ import 'package:web_dex/common/screen.dart';
 import 'package:web_dex/mm2/mm2_api/mm2_api.dart';
 import 'package:web_dex/mm2/mm2_api/rpc/show_priv_key/show_priv_key_request.dart';
 import 'package:web_dex/model/coin.dart';
-import 'package:web_dex/model/settings_menu_value.dart';
 import 'package:web_dex/views/common/page_header/page_header.dart';
 import 'package:web_dex/views/common/pages/page_layout.dart';
 import 'package:web_dex/views/common/wallet_password_dialog/wallet_password_dialog.dart';
@@ -19,64 +19,181 @@ import 'package:web_dex/views/settings/widgets/security_settings/security_settin
 import 'package:web_dex/views/settings/widgets/security_settings/seed_settings/seed_confirm_success.dart';
 import 'package:web_dex/views/settings/widgets/security_settings/seed_settings/seed_confirmation/seed_confirmation.dart';
 import 'package:web_dex/views/settings/widgets/security_settings/seed_settings/seed_show.dart';
+import 'package:web_dex/views/settings/widgets/security_settings/private_key_settings/private_key_show.dart';
+import 'package:web_dex/views/settings/widgets/security_settings/private_key_settings/private_key_confirmation.dart';
+import 'package:web_dex/views/settings/widgets/security_settings/private_key_settings/private_key_confirm_success.dart';
 
+/// Security settings page that manages both seed phrase and private key backup flows.
+///
+/// **Security Architecture**: This page implements a hybrid security approach:
+/// - **Authentication and flow control** are managed by [SecuritySettingsBloc]
+/// - **Sensitive data (private keys)** are handled directly in this UI layer
+/// - Private keys are stored in local variables with minimal lifetime
+/// - Automatic cleanup ensures sensitive data doesn't persist in memory
+///
+/// This approach balances clean architecture with maximum security for cryptocurrency
+/// private key handling, following industry best practices for sensitive data management.
 class SecuritySettingsPage extends StatefulWidget {
-  // ignore: prefer_const_constructors_in_immutables
-  SecuritySettingsPage({required this.onBackPressed, super.key});
+  const SecuritySettingsPage({required this.onBackPressed, super.key});
+
   final VoidCallback onBackPressed;
+
   @override
   State<SecuritySettingsPage> createState() => _SecuritySettingsPageState();
 }
 
 class _SecuritySettingsPageState extends State<SecuritySettingsPage> {
+  // MARK: - Seed Phrase Data (Legacy approach for backward compatibility)
   String _seed = '';
   final Map<Coin, String> _privKeys = {};
+
+  // MARK: - Private Key Data (Secure handling in UI layer)
+  /// Private keys fetched from SDK - stored locally for minimal memory exposure.
+  ///
+  /// **Security Note**: These are intentionally stored in the UI layer rather than
+  /// in BLoC state to minimize their memory lifetime and scope. They are:
+  /// - Fetched only after authentication succeeds
+  /// - Cleared immediately when no longer needed
+  /// - Never passed through shared state or persisted
+  /// - Automatically cleaned up when widget disposes
+  Map<AssetId, List<PrivateKey>>? _sdkPrivateKeys;
+
+  @override
+  void dispose() {
+    // Ensure sensitive data is cleared when widget is disposed
+    _clearAllSensitiveData();
+    super.dispose();
+  }
+
+  /// Clears all sensitive data from memory.
+  ///
+  /// This method ensures that private keys and seed phrases don't persist
+  /// in memory longer than necessary. Called when:
+  /// - Widget is disposed
+  /// - Navigating away from private key flows
+  /// - Any error occurs during private key operations
+  void _clearAllSensitiveData() {
+    _seed = '';
+    _privKeys.clear();
+    _sdkPrivateKeys?.clear();
+    _sdkPrivateKeys = null;
+  }
+
+  /// Clears only private key data while preserving seed data.
+  ///
+  /// Used when transitioning between different security flows.
+  void _clearPrivateKeyData() {
+    _sdkPrivateKeys?.clear();
+    _sdkPrivateKeys = null;
+  }
 
   @override
   Widget build(BuildContext context) {
     return BlocProvider<SecuritySettingsBloc>(
-      create: (_) => SecuritySettingsBloc(
+      create: (context) => SecuritySettingsBloc(
         SecuritySettingsState.initialState(),
+        kdfSdk: RepositoryProvider.of<KomodoDefiSdk>(context),
       ),
-      child: BlocBuilder<SecuritySettingsBloc, SecuritySettingsState>(
-        builder: (BuildContext context, SecuritySettingsState state) {
-          final Widget content = _buildContent(state.step);
-          if (isMobile) {
-            return _SecuritySettingsPageMobile(
-              content: content,
-              onBackButtonPressed: () {
-                switch (state.step) {
-                  case SecuritySettingsStep.securityMain:
-                    widget.onBackPressed();
-                    break;
-                  case SecuritySettingsStep.seedConfirm:
-                    context
-                        .read<SecuritySettingsBloc>()
-                        .add(const ShowSeedEvent());
-                    break;
-                  case SecuritySettingsStep.seedShow:
-                  case SecuritySettingsStep.seedSuccess:
-                  case SecuritySettingsStep.passwordUpdate:
-                    context
-                        .read<SecuritySettingsBloc>()
-                        .add(const ResetEvent());
-                    break;
-                }
-              },
-            );
-          }
-          return content;
-        },
+      child: MultiBlocListener(
+        listeners: [
+          // Listen for private key authentication success
+          BlocListener<SecuritySettingsBloc, SecuritySettingsState>(
+            listenWhen: (previous, current) =>
+                current.privateKeyAuthenticationSuccess &&
+                !previous.privateKeyAuthenticationSuccess,
+            listener: (context, state) {
+              _handlePrivateKeyAuthenticationSuccess(context);
+            },
+          ),
+          // Listen for step changes to manage sensitive data cleanup
+          BlocListener<SecuritySettingsBloc, SecuritySettingsState>(
+            listenWhen: (previous, current) => previous.step != current.step,
+            listener: (context, state) {
+              _handleStepChange(state.step);
+            },
+          ),
+          // Listen for authentication errors
+          BlocListener<SecuritySettingsBloc, SecuritySettingsState>(
+            listenWhen: (previous, current) =>
+                current.authError != null &&
+                previous.authError != current.authError,
+            listener: (context, state) {
+              if (state.authError != null) {
+                _showAuthenticationError(context, state.authError!);
+              }
+            },
+          ),
+        ],
+        child: BlocBuilder<SecuritySettingsBloc, SecuritySettingsState>(
+          builder: (BuildContext context, SecuritySettingsState state) {
+            final Widget content = _buildContent(state.step);
+            if (isMobile) {
+              return _SecuritySettingsPageMobile(
+                content: content,
+                onBackButtonPressed: () =>
+                    _handleBackButton(context, state.step),
+              );
+            }
+            return content;
+          },
+        ),
       ),
     );
   }
 
+  /// Handles back button navigation based on current step.
+  void _handleBackButton(BuildContext context, SecuritySettingsStep step) {
+    switch (step) {
+      case SecuritySettingsStep.securityMain:
+        widget.onBackPressed();
+        break;
+      case SecuritySettingsStep.seedConfirm:
+        context.read<SecuritySettingsBloc>().add(const ShowSeedEvent());
+        break;
+      case SecuritySettingsStep.privateKeyConfirm:
+        context.read<SecuritySettingsBloc>().add(const ShowPrivateKeysEvent());
+        break;
+      case SecuritySettingsStep.seedShow:
+      case SecuritySettingsStep.seedSuccess:
+      case SecuritySettingsStep.privateKeyShow:
+      case SecuritySettingsStep.privateKeySuccess:
+      case SecuritySettingsStep.passwordUpdate:
+        context.read<SecuritySettingsBloc>().add(const ResetEvent());
+        break;
+    }
+  }
+
+  /// Handles step changes to manage sensitive data lifecycle.
+  ///
+  /// Clears sensitive data when navigating away from private key flows
+  /// to minimize memory exposure.
+  void _handleStepChange(SecuritySettingsStep step) {
+    switch (step) {
+      case SecuritySettingsStep.securityMain:
+      case SecuritySettingsStep.seedShow:
+      case SecuritySettingsStep.seedConfirm:
+      case SecuritySettingsStep.seedSuccess:
+      case SecuritySettingsStep.passwordUpdate:
+        // Clear private key data when not in private key flow
+        _clearPrivateKeyData();
+        break;
+      case SecuritySettingsStep.privateKeyShow:
+      case SecuritySettingsStep.privateKeyConfirm:
+      case SecuritySettingsStep.privateKeySuccess:
+        // Private key data should persist during private key flow
+        break;
+    }
+  }
+
+  /// Builds the appropriate content widget based on the current step.
   Widget _buildContent(SecuritySettingsStep step) {
     switch (step) {
       case SecuritySettingsStep.securityMain:
-        _seed = '';
-        _privKeys.clear();
-        return SecuritySettingsMainPage(onViewSeedPressed: onViewSeedPressed);
+        _clearAllSensitiveData(); // Clear data when returning to main
+        return SecuritySettingsMainPage(
+          onViewSeedPressed: onViewSeedPressed,
+          onViewPrivateKeysPressed: onViewPrivateKeysPressed,
+        );
 
       case SecuritySettingsStep.seedShow:
         return SeedShow(seedPhrase: _seed, privKeys: _privKeys);
@@ -85,17 +202,31 @@ class _SecuritySettingsPageState extends State<SecuritySettingsPage> {
         return SeedConfirmation(seedPhrase: _seed);
 
       case SecuritySettingsStep.seedSuccess:
-        _seed = '';
-        _privKeys.clear();
+        _clearAllSensitiveData(); // Clear data after successful seed backup
         return const SeedConfirmSuccess();
 
+      case SecuritySettingsStep.privateKeyShow:
+        return PrivateKeyShow(privateKeys: _sdkPrivateKeys ?? {});
+
+      case SecuritySettingsStep.privateKeyConfirm:
+        return const PrivateKeyConfirmation();
+
+      case SecuritySettingsStep.privateKeySuccess:
+        _clearAllSensitiveData(); // Clear data after successful backup
+        return const PrivateKeyConfirmSuccess();
+
       case SecuritySettingsStep.passwordUpdate:
-        _seed = '';
-        _privKeys.clear();
+        _clearAllSensitiveData(); // Clear data when changing password
         return const PasswordUpdatePage();
     }
   }
 
+  // MARK: - Seed Phrase Handling (Legacy approach)
+
+  /// Handles seed phrase export - uses existing legacy approach.
+  ///
+  /// This maintains backward compatibility with the existing seed phrase
+  /// backup flow while the private key flow uses the new hybrid approach.
   Future<void> onViewSeedPressed(BuildContext context) async {
     final SecuritySettingsBloc securitySettingsBloc =
         context.read<SecuritySettingsBloc>();
@@ -126,29 +257,111 @@ class _SecuritySettingsPageState extends State<SecuritySettingsPage> {
 
     securitySettingsBloc.add(const ShowSeedEvent());
   }
+
+  // MARK: - Private Key Handling (Hybrid Security Approach)
+
+  /// Initiates private key export flow using hybrid security approach.
+  ///
+  /// **Security Flow**:
+  /// 1. Shows password dialog for user authentication
+  /// 2. Triggers authentication event in BLoC (non-sensitive)
+  /// 3. BLoC validates authentication without handling private keys
+  /// 4. On success, [_handlePrivateKeyAuthenticationSuccess] fetches private keys
+  /// 5. Private keys are stored locally in UI layer only
+  ///
+  /// This separates authentication logic (in BLoC) from sensitive data handling (in UI).
+  Future<void> onViewPrivateKeysPressed(BuildContext context) async {
+    final String? password = await walletPasswordDialog(context);
+    if (password == null) return;
+
+    // Clear any existing authentication errors
+    // ignore: use_build_context_synchronously
+    context
+        .read<SecuritySettingsBloc>()
+        .add(const ClearAuthenticationErrorEvent());
+
+    // Trigger authentication in BLoC (no sensitive data passed)
+    // ignore: use_build_context_synchronously
+    context
+        .read<SecuritySettingsBloc>()
+        .add(const AuthenticateForPrivateKeysEvent());
+  }
+
+  /// Handles successful authentication by fetching private keys securely.
+  ///
+  /// **Security Note**: This method is called only after BLoC confirms authentication.
+  /// Private keys are fetched and stored directly in the UI layer to minimize
+  /// their memory lifetime and scope. They never pass through BLoC state.
+  Future<void> _handlePrivateKeyAuthenticationSuccess(
+      BuildContext context) async {
+    try {
+      final kdfSdk = RepositoryProvider.of<KomodoDefiSdk>(context);
+
+      // Create SecurityManager for private key retrieval
+      final securityManager = SecurityManager(
+        kdfSdk.client,
+        kdfSdk.auth,
+        kdfSdk.assets,
+      );
+
+      // Fetch private keys directly into local UI state
+      // This keeps sensitive data in minimal scope
+      _sdkPrivateKeys = await securityManager.getPrivateKeys();
+
+      // Proceed to show private keys screen
+      // ignore: use_build_context_synchronously
+      context.read<SecuritySettingsBloc>().add(const ShowPrivateKeysEvent());
+    } catch (e) {
+      // Clear sensitive data on any error
+      _clearPrivateKeyData();
+
+      // Show error to user
+      // ignore: use_build_context_synchronously
+      _showPrivateKeyError(
+          context, 'Failed to retrieve private keys: ${e.toString()}');
+    }
+  }
+
+  /// Shows authentication error to the user.
+  void _showAuthenticationError(BuildContext context, String error) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Authentication failed: $error'),
+        backgroundColor: Colors.red,
+      ),
+    );
+  }
+
+  /// Shows private key retrieval error to the user.
+  void _showPrivateKeyError(BuildContext context, String error) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(error),
+        backgroundColor: Colors.red,
+        duration: const Duration(seconds: 5),
+      ),
+    );
+  }
 }
 
+/// Mobile wrapper for security settings page.
 class _SecuritySettingsPageMobile extends StatelessWidget {
   const _SecuritySettingsPageMobile({
-    required this.onBackButtonPressed,
     required this.content,
+    required this.onBackButtonPressed,
   });
-  final VoidCallback onBackButtonPressed;
+
   final Widget content;
+  final VoidCallback onBackButtonPressed;
 
   @override
   Widget build(BuildContext context) {
     return PageLayout(
       header: PageHeader(
-        title: SettingsMenuValue.security.title,
-        backText: '',
+        title: 'Security Settings',
         onBackButtonPressed: onBackButtonPressed,
       ),
-      content: Flexible(
-        child: SettingsContentWrapper(
-          child: content,
-        ),
-      ),
+      content: SettingsContentWrapper(child: content),
     );
   }
 }
