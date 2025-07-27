@@ -69,6 +69,7 @@ class _AssetFiatPrice extends StatelessWidget {
     return Flex(
       direction: isMobile ? Axis.vertical : Axis.horizontal,
       crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min, // Prevent layout constraint violations
       children: [
         Text(LocaleKeys.price.tr(),
             style: Theme.of(context)
@@ -118,6 +119,7 @@ class _AssetFiatValuePercentageChange extends StatelessWidget {
         return Flex(
           direction: isMobile ? Axis.vertical : Axis.horizontal,
           crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min, // Prevent layout constraint violations
           children: [
             Text(LocaleKeys.change24h.tr(),
                 style: Theme.of(context)
@@ -157,6 +159,7 @@ class _AssetFiatBalance extends StatelessWidget {
     return Flex(
       direction: isMobile ? Axis.vertical : Axis.horizontal,
       crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min, // Prevent layout constraint violations
       children: [
         Text(
           LocaleKeys.fiatBalance.tr(),
@@ -166,7 +169,7 @@ class _AssetFiatBalance extends StatelessWidget {
                 color: Theme.of(context).textTheme.bodyMedium?.color,
               ),
         ),
-        const SizedBox(height: 3),
+        isMobile ? const SizedBox(height: 3) : const SizedBox(width: 10),
         CoinFiatBalance(
           coin,
           style: const TextStyle(
