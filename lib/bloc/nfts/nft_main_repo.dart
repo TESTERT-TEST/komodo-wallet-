@@ -27,8 +27,12 @@ class NftsRepo {
     final parentCoins = chains
         .map(
           (chain) =>
-              knownCoins.firstWhere((coin) => coin.id.id == chain.coinAbbr()),
+              knownCoins.firstWhere(
+                (coin) => coin.id.id == chain.coinAbbr(),
+                orElse: () => null,
+              ),
         )
+        .where((coin) => coin != null)
         .toList();
 
     if (parentCoins.isEmpty) return;
