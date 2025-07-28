@@ -29,23 +29,28 @@ class Mm2ApiNft {
   Future<Map<String, dynamic>> updateNftList(
     List<NftBlockchains> chains,
   ) async {
-    try {
-      final List<String> nftChains = await getActiveNftChains(chains);
-      if (nftChains.isEmpty) {
-        return {
-          'error':
-              'Please ensure an NFT chain is activated and patiently await '
-                  'while your NFTs are loaded.',
-        };
+    bool hasSuccess = false;
+    for (final chain in chains) {
+      try {
+        await _enableNftChains([chain]);
+        final List<String> nftChains = await getActiveNftChains([chain]);
+        if (nftChains.isEmpty) continue;
+        final request = UpdateNftRequest(chains: nftChains);
+        await call(request);
+        hasSuccess = true;
+      } catch (e, s) {
+        _log.shout(
+            'Error updating nft for chain ${chain.toApiRequest()}', e, s);
       }
-      await _enableNftChains(chains);
-      final request = UpdateNftRequest(chains: nftChains);
-
-      return await call(request);
-    } catch (e, s) {
-      _log.shout('Error updating nfts', e, s);
-      throw TransportError(message: e.toString());
     }
+
+    if (!hasSuccess) {
+      return {
+        'error': 'Failed to update NFTs for the provided chains',
+      };
+    }
+
+    return {'result': 'ok'};
   }
 
   Future<Map<String, dynamic>> refreshNftMetadata({
@@ -67,23 +72,43 @@ class Mm2ApiNft {
   }
 
   Future<Map<String, dynamic>> getNftList(List<NftBlockchains> chains) async {
-    try {
-      final List<String> nftChains = await getActiveNftChains(chains);
-      if (nftChains.isEmpty) {
-        return {
-          'error':
-              'Please ensure the NFT chain is activated and patiently await '
-                  'while your NFTs are loaded.',
-        };
+    final List<NftBlockchains> enabledChains = [];
+    for (final chain in chains) {
+      try {
+        await _enableNftChains([chain]);
+        enabledChains.add(chain);
+      } catch (e, s) {
+        _log.shout('Failed to enable nft chain ${chain.toApiRequest()}', e, s);
       }
-
-      final request = GetNftListRequest(chains: nftChains);
-      final JsonMap json = await call(request);
-      return json;
-    } catch (e, s) {
-      _log.shout('Error getting nft list', e, s);
-      throw TransportError(message: e.toString());
     }
+
+    final List<String> nftChains = await getActiveNftChains(enabledChains);
+    if (nftChains.isEmpty) {
+      return {
+        'error': 'Please ensure the NFT chain is activated and patiently await '
+            'while your NFTs are loaded.',
+      };
+    }
+
+    final List<dynamic> nfts = [];
+    for (final chain in nftChains) {
+      try {
+        final request = GetNftListRequest(chains: [chain]);
+        final JsonMap res = await call(request);
+        final chainNfts = res['result'] != null
+            ? List<dynamic>.from(res['result']['nfts'] as List? ?? [])
+            : <dynamic>[];
+        nfts.addAll(chainNfts);
+      } catch (e, s) {
+        _log.shout('Error getting nft list for chain $chain', e, s);
+      }
+    }
+
+    return {
+      'result': {
+        'nfts': nfts,
+      },
+    };
   }
 
   Future<Map<String, dynamic>> withdraw(WithdrawNftRequest request) async {
