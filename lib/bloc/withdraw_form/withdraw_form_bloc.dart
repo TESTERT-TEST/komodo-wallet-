@@ -521,8 +521,14 @@ class WithdrawFormBloc extends Bloc<WithdrawFormEvent, WithdrawFormState> {
         amount: '0',
         pubkeys: state.pubkeys,
         selectedSourceAddress: state.pubkeys?.keys.first,
+        feeOptions: state.feeOptions,
       ),
     );
+
+    // Re-request fee options if they're not available
+    if (state.feeOptions == null) {
+      add(const WithdrawFormFeeOptionsRequested());
+    }
   }
 
   bool _hasEthAddressMixedCase(String address) {
