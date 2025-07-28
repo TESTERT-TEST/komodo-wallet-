@@ -18,8 +18,35 @@ class NftsRepo {
   final CoinsRepo _coinsRepo;
   final Mm2ApiNft _api;
 
+  /// Ensures that the parent coins for the provided NFT chains are activated.
+  ///
+  /// TODO: Migrate NFT functionality to the SDK. This is a temporary measure
+  /// during the transition period.
+  Future<void> _activateParentCoins(List<NftBlockchains> chains) async {
+    final knownCoins = _coinsRepo.getKnownCoins();
+    final parentCoins = chains
+        .map(
+          (chain) =>
+              knownCoins.firstWhere((coin) => coin.id.id == chain.coinAbbr()),
+        )
+        .toList();
+
+    if (parentCoins.isEmpty) return;
+
+    try {
+      await _coinsRepo.activateCoinsSync(parentCoins);
+    } catch (e) {
+      log(
+        'Failed to activate parent coins: $e',
+        path: 'nft_main_repo => _activateParentCoins',
+        isError: true,
+      ).ignore();
+    }
+  }
+
   Future<void> updateNft(List<NftBlockchains> chains) async {
     // Only runs on active nft chains
+    await _activateParentCoins(chains);
     final json = await _api.updateNftList(chains);
     if (json['error'] != null) {
       log(
@@ -33,6 +60,7 @@ class NftsRepo {
 
   Future<List<NftToken>> getNfts(List<NftBlockchains> chains) async {
     // Only runs on active nft chains
+    await _activateParentCoins(chains);
     final json = await _api.getNftList(chains);
     final jsonError = json['error'] as String?;
     if (jsonError != null) {
