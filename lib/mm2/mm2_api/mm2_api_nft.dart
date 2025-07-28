@@ -104,12 +104,6 @@ class Mm2ApiNft {
       }
     }
 
-    if (nfts.isEmpty) {
-      return {
-        'error': 'Failed to fetch NFTs for the provided chains',
-      };
-    }
-
     return {
       'result': {
         'nfts': nfts,
