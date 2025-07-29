@@ -1,6 +1,6 @@
 {
-    "name": "Komodo Web Wallet",
-    "short_name": "KomodoWebWallet",
+    "name": "QuBitcoin Web Wallet",
+    "short_name": "QuBitcoinWebWallet",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#ffffff",
@@ -11,7 +11,7 @@
     "related_applications": [
         {
             "platform": "play",
-            "url": "https://play.google.com/store/apps/details?id=com.komodoplatform.atomicdex"
+            "url": "/"
         }
     ],
     "icons": [
