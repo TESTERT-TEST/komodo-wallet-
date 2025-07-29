@@ -42,19 +42,19 @@ class ThemeCustomDark extends ThemeExtension<ThemeCustomDark>
   final TextStyle tradingFormDetailsContent = const TextStyle(
     fontSize: 14,
     fontWeight: FontWeight.w700,
-    color: Color.fromRGBO(106, 139, 235, 1),
+    color: Color.fromRGBO(20, 184, 143, 1), // Изменено на rgb(20, 184, 143)
   );
   @override
   final Color fiatAmountColor = const Color.fromRGBO(168, 177, 185, 1);
   @override
-  final Color headerFloatBoxColor = const Color.fromRGBO(98, 121, 233, 1);
+  final Color headerFloatBoxColor = const Color.fromRGBO(20, 184, 143, 1); // Изменено
   @override
   final Color headerIconColor = const Color.fromRGBO(255, 255, 255, 1);
   @override
   final Color buttonColorDefault = const Color.fromRGBO(23, 29, 48, 1);
 
   @override
-  final Color buttonColorDefaultHover = const Color.fromRGBO(76, 128, 233, 1);
+  final Color buttonColorDefaultHover = const Color.fromRGBO(74, 222, 128, 1); // Изменено на rgb(74, 222, 128)
   @override
   final Color buttonTextColorDefaultHover =
       const Color.fromRGBO(245, 249, 255, 1);
@@ -75,16 +75,16 @@ class ThemeCustomDark extends ThemeExtension<ThemeCustomDark>
       const Color.fromRGBO(90, 230, 205, 1);
   @override
   final Color simpleButtonBackgroundColor =
-      const Color.fromRGBO(136, 146, 235, 0.2);
+      const Color.fromRGBO(20, 184, 143, 0.2); // Изменено
   @override
   final Color disabledButtonBackgroundColor =
-      const Color.fromRGBO(90, 104, 230, 0.3);
+      const Color.fromRGBO(20, 184, 143, 0.3); // Изменено
   @override
   final Gradient authorizePageBackgroundColor = const RadialGradient(
     center: Alignment.bottomCenter,
     colors: [
-      Color.fromRGBO(42, 188, 241, 0.1),
-      Color.fromRGBO(42, 188, 241, 0),
+      Color.fromRGBO(20, 184, 143, 0.1), // Изменено
+      Color.fromRGBO(20, 184, 143, 0), // Изменено
     ],
   );
   @override
@@ -92,11 +92,11 @@ class ThemeCustomDark extends ThemeExtension<ThemeCustomDark>
   @override
   final Color defaultGradientButtonTextColor = Colors.white;
   @override
-  final Color defaultCheckboxColor = const Color.fromRGBO(81, 121, 233, 1);
+  final Color defaultCheckboxColor = const Color.fromRGBO(20, 184, 143, 1); // Изменено
   @override
   final Gradient defaultSwitchColor = const LinearGradient(
     stops: [0, 93],
-    colors: [Color(0xFF00C3AA), Color(0xFF00D4FF)],
+    colors: [Color(0xFF00C3AA), Color.fromRGBO(20, 184, 143, 1)], // Изменено
   );
   @override
   final Color settingsMenuItemBackgroundColor = const Color(0xFF141414);
@@ -109,7 +109,7 @@ class ThemeCustomDark extends ThemeExtension<ThemeCustomDark>
   @override
   final Color rewardBoxShadowColor = const Color.fromRGBO(0, 0, 0, 0.1);
   @override
-  final Color defaultBorderButtonBorder = const Color(0xFF00D4FF);
+  final Color defaultBorderButtonBorder = const Color.fromRGBO(20, 184, 143, 1); // Изменено
   @override
   final Color defaultBorderButtonBackground =
       const Color.fromRGBO(22, 25, 39, 1);
@@ -131,7 +131,7 @@ class ThemeCustomDark extends ThemeExtension<ThemeCustomDark>
       blurRadius: 8,
       color: Color.fromRGBO(0, 0, 0, 0.3),
     ),
-    filterPopupItemBorderColor: Color(0xFF00D4FF),
+    filterPopupItemBorderColor: Color.fromRGBO(20, 184, 143, 1), // Изменено
   );
   @override
   final DexPageTheme dexPageTheme = const DexPageTheme(
@@ -141,8 +141,8 @@ class ThemeCustomDark extends ThemeExtension<ThemeCustomDark>
     inactiveOrderFormTab: Color.fromRGBO(152, 155, 182, 1),
     formPlateGradient: LinearGradient(
       colors: [
-        Color.fromRGBO(134, 213, 255, 1),
-        Color.fromRGBO(178, 107, 255, 1),
+        Color.fromRGBO(20, 184, 143, 1), // Изменено
+        Color.fromRGBO(74, 222, 128, 1), // Изменено
       ],
       begin: Alignment.topLeft,
       end: Alignment.bottomRight,
@@ -152,7 +152,7 @@ class ThemeCustomDark extends ThemeExtension<ThemeCustomDark>
     frontPlateBorder: Color.fromRGBO(43, 49, 87, 1),
     activeText: Colors.white,
     inactiveText: Color.fromRGBO(123, 131, 152, 1),
-    blueText: Color.fromRGBO(100, 124, 233, 1),
+    blueText: Color.fromRGBO(20, 184, 143, 1), // Изменено
     smallButton: Color.fromRGBO(35, 45, 72, 1),
     smallButtonText: Color.fromRGBO(141, 150, 167, 1),
     pagePlateDivider: Color.fromRGBO(32, 37, 63, 1),
@@ -177,13 +177,13 @@ class ThemeCustomDark extends ThemeExtension<ThemeCustomDark>
   @override
   final Color specificButtonBackgroundColor = const Color(0xFF141414);
   @override
-  final Color balanceColor = const Color.fromRGBO(106, 139, 235, 1);
+  final Color balanceColor = const Color.fromRGBO(20, 184, 143, 1); // Изменено
   @override
   final Color subBalanceColor = const Color.fromRGBO(124, 136, 171, 1);
   @override
   final Color subCardBackgroundColor = const Color(0xFF0F0F0F);
   @override
-  final Color lightButtonColor = const Color.fromRGBO(0, 212, 170, 0.12);
+  final Color lightButtonColor = const Color.fromRGBO(20, 184, 143, 0.12); // Изменено
   @override
   final Color filterItemBorderColor = const Color.fromRGBO(52, 56, 77, 1);
   @override
@@ -191,7 +191,7 @@ class ThemeCustomDark extends ThemeExtension<ThemeCustomDark>
   @override
   final Color progressBarColor = const Color.fromRGBO(69, 96, 120, 0.33);
   @override
-  final Color progressBarPassedColor = const Color.fromRGBO(137, 147, 236, 1);
+  final Color progressBarPassedColor = const Color.fromRGBO(20, 184, 143, 1); // Изменено
   @override
   final Color progressBarNotPassedColor =
       const Color.fromRGBO(194, 203, 210, 1);
@@ -206,14 +206,14 @@ class ThemeCustomDark extends ThemeExtension<ThemeCustomDark>
   final Color smartchainLabelBorderColor = const Color.fromRGBO(32, 22, 49, 1);
   @override
   final Color mainMenuSelectedItemBackgroundColor =
-      const Color.fromRGBO(0, 212, 170, 0.12);
+      const Color.fromRGBO(20, 184, 143, 0.12); // Изменено
   @override
   final Color searchFieldMobile = const Color.fromRGBO(42, 47, 62, 1);
   @override
   final Color walletEditButtonsBackgroundColor =
       const Color.fromRGBO(29, 33, 53, 1);
   @override
-  final Color swapButtonColor = const Color.fromRGBO(64, 146, 219, 1);
+  final Color swapButtonColor = const Color.fromRGBO(20, 184, 143, 1); // Изменено
   @override
   final bridgeFormHeader = const TextStyle(
       fontSize: 11, fontWeight: FontWeight.w500, letterSpacing: 3.5);

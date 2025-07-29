@@ -2,11 +2,11 @@ import 'package:app_theme/app_theme.dart';
 import 'package:flutter/material.dart';
 
 const ColorSchemeExtension _colorSchemeExtension = ColorSchemeExtension(
-  primary: Color(0xFF00D4FF), // Teal primary
-  p50: Color(0xFF80EAD7), // Light teal
-  p40: Color(0xFFB3F0E0), // Lighter teal
-  p10: Color(0xFFE6F9F5), // Very light teal
-  secondary: Color(0xFF00C3AA), // Teal secondary
+  primary: Color(0xFF14B88F), // Changed to rgb(20, 184, 143)
+  p50: Color(0xFF8ADBC4), // Light version of primary
+  p40: Color(0xFFB1E7D7), // Lighter version
+  p10: Color(0xFFE6F8F3), // Very light version
+  secondary: Color(0xFF4ADE80), // Changed to rgb(74, 222, 128)
   s70: Color.fromRGBO(125, 144, 161, 1),
   s50: Color.fromRGBO(162, 175, 187, 1),
   s40: Color.fromRGBO(181, 191, 201, 1),

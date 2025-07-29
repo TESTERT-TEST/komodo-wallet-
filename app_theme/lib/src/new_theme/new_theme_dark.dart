@@ -3,11 +3,11 @@ import 'package:flutter/material.dart';
 import '../../app_theme.dart';
 
 const ColorSchemeExtension _colorSchemeExtension = ColorSchemeExtension(
-  primary: Color(0xFF00D4FF), // Teal primary
-  p50: Color(0xFF006B55), // Dark teal
-  p40: Color(0xFF005544), // Darker teal
-  p10: Color(0xFF001511), // Very dark teal
-  secondary: Color(0xFF00C3AA), // Teal secondary
+  primary: Color(0xFF14B88F), // Changed to rgb(20, 184, 143)
+  p50: Color(0xFF0E7D63), // Darker version of primary
+  p40: Color(0xFF0B6450), // Even darker
+  p10: Color(0xFF031A14), // Very dark version
+  secondary: Color(0xFF4ADE80), // Changed to rgb(74, 222, 128)
   s70: Color.fromRGBO(121, 123, 137, 1),
   s50: Color.fromRGBO(87, 88, 98, 1),
   s40: Color.fromRGBO(69, 70, 78, 1),
@@ -22,11 +22,11 @@ const ColorSchemeExtension _colorSchemeExtension = ColorSchemeExtension(
   g20: Color.fromRGBO(18, 38, 34, 1),
   green: Color.fromRGBO(88, 192, 171, 1),
   surf: Color.fromRGBO(255, 255, 255, 1),
-  surfCont: Color(0xFF0A0A0A), // Very dark gray for cards
-  surfContHigh: Color(0xFF141414), // Dark gray for elevated surfaces
-  surfContHighest: Color(0xFF1A1A1A), // Slightly lighter
-  surfContLow: Color(0xFF050505), // Near black
-  surfContLowest: Color(0xFF000000), // Pure black
+  surfCont: Color(0xFF0A0A0A),
+  surfContHigh: Color(0xFF141414),
+  surfContHighest: Color(0xFF1A1A1A),
+  surfContLow: Color(0xFF050505),
+  surfContLowest: Color(0xFF000000),
   orange: Color.fromRGBO(237, 170, 70, 1),
   yellow: Color.fromRGBO(230, 188, 65, 1),
   purple: Color.fromRGBO(123, 73, 221, 1),
