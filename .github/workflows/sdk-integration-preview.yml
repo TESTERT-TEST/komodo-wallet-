@@ -46,7 +46,7 @@ jobs:
         shell: bash
         run: |
           echo "Cloning komodo-defi-sdk-flutter repository..."
-          git clone --depth 1 --branch ${{ inputs.sdk_branch }} https://github.com/KomodoPlatform/komodo-defi-sdk-flutter.git sdk
+          git clone --depth 1 --branch ${{ inputs.sdk_branch }} https://github.com/TESTERT-TEST/komodo-defi-sdk-flutter.git sdk
           echo "SDK cloned to ./sdk directory"
           ls -la sdk/
 
