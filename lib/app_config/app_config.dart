@@ -38,8 +38,8 @@ const Duration kPerformanceLogInterval = Duration(minutes: 1);
 // This information is here because it is not contextual and is branded.
 // Names of their own are not localized. Also, the application is initialized before
 // the localization package is initialized.
-String get appTitle => 'Komodo Wallet | Non-Custodial Multi-Coin Wallet & DEX';
-String get appShortTitle => 'Komodo Wallet';
+String get appTitle => 'QuBitcoin Wallet | Non-Custodial Multi-Coin Wallet & DEX';
+String get appShortTitle => 'QuBitcoin Wallet';
 
 Map<String, int> priorityCoinsAbbrMap = {
   // KMD always has highest priority (special case for Komodo ecosystem)
