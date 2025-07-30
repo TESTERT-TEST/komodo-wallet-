@@ -51,7 +51,7 @@ class ThemeCustomDark extends ThemeExtension<ThemeCustomDark>
   @override
   final Color headerIconColor = const Color.fromRGBO(255, 255, 255, 1);
   @override
-  final Color buttonColorDefault = const Color.fromRGBO(23, 29, 48, 1);
+  final Color buttonColorDefault = const Color.fromRGBO(7, 26, 1, 1);
 
   @override
   final Color buttonColorDefaultHover = const Color.fromRGBO(74, 222, 128, 1); // Изменено на rgb(74, 222, 128)
@@ -72,7 +72,7 @@ class ThemeCustomDark extends ThemeExtension<ThemeCustomDark>
   final Color zebraHoverColor = const Color(0xFF1A1A1A);
   @override
   final Color passwordButtonSuccessColor =
-      const Color.fromRGBO(90, 230, 205, 1);
+      const Color.fromRGBO(162, 230, 140, 1);
   @override
   final Color simpleButtonBackgroundColor =
       const Color.fromRGBO(20, 184, 143, 0.2); // Изменено
@@ -104,7 +104,7 @@ class ThemeCustomDark extends ThemeExtension<ThemeCustomDark>
   final Gradient userRewardBoxColor = const LinearGradient(
       begin: Alignment.topLeft,
       end: Alignment.bottomRight,
-      colors: [Color.fromRGBO(18, 20, 32, 1), Color.fromRGBO(22, 25, 39, 1)],
+      colors: [Color.fromRGBO(7, 26, 1, 1), Color.fromRGBO(7, 26, 1, 1)],
       stops: [0.05, 0.33]);
   @override
   final Color rewardBoxShadowColor = const Color.fromRGBO(0, 0, 0, 0.1);
@@ -112,7 +112,7 @@ class ThemeCustomDark extends ThemeExtension<ThemeCustomDark>
   final Color defaultBorderButtonBorder = const Color.fromRGBO(20, 184, 143, 1); // Изменено
   @override
   final Color defaultBorderButtonBackground =
-      const Color.fromRGBO(22, 25, 39, 1);
+      const Color.fromRGBO(7, 26, 1, 1);
   @override
   final Color successColor = const Color.fromRGBO(0, 192, 88, 1);
 
@@ -173,7 +173,7 @@ class ThemeCustomDark extends ThemeExtension<ThemeCustomDark>
   @override
   final double dexInputWidth = 320;
   @override
-  final Color specificButtonBorderColor = const Color.fromRGBO(38, 40, 52, 1);
+  final Color specificButtonBorderColor = const Color.fromRGBO(55, 92, 48, 1);
   @override
   final Color specificButtonBackgroundColor = const Color(0xFF141414);
   @override
@@ -189,7 +189,7 @@ class ThemeCustomDark extends ThemeExtension<ThemeCustomDark>
   @override
   final Color warningColor = const Color.fromRGBO(229, 33, 103, 1);
   @override
-  final Color progressBarColor = const Color.fromRGBO(69, 96, 120, 0.33);
+  final Color progressBarColor = const Color.fromRGBO(57, 97, 44, 0.33);
   @override
   final Color progressBarPassedColor = const Color.fromRGBO(20, 184, 143, 1); // Изменено
   @override
