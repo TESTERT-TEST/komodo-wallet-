@@ -39,8 +39,8 @@ const Duration kPerformanceLogInterval = Duration(minutes: 1);
 // This information is here because it is not contextual and is branded.
 // Names of their own are not localized. Also, the application is initialized before
 // the localization package is initialized.
-String get appTitle => 'Komodo Wallet | Non-Custodial Multi-Coin Wallet & DEX';
-String get appShortTitle => 'Komodo Wallet';
+String get appTitle => 'QuBitcoin Wallet | Non-Custodial Multi-Coin Wallet & DEX';
+String get appShortTitle => 'QuBitcoin Wallet';
 
 Map<String, int> priorityCoinsAbbrMap = {
   // KMD always has highest priority (special case for Komodo ecosystem)
@@ -163,6 +163,7 @@ const List<String> appWalletOnlyAssetList = [
 /// Coins that are enabled by default on restore from seed or registration.
 /// This will not affect existing wallets.
 List<String> get enabledByDefaultCoins => [
+  'QTC', // QTC (Rank 40, ~$1.4M market cap)
   'KMD', // Always included (Komodo ecosystem)
   'BTC-segwit', // Bitcoin (Rank 1, ~$2.21T market cap)
   'ETH', // Ethereum (Rank 2, ~$335B market cap)
@@ -170,7 +171,6 @@ List<String> get enabledByDefaultCoins => [
   'DOGE', // Dogecoin (Rank 9, ~$27.1B market cap)
   'LTC-segwit', // Litecoin (popular, has segwit support)
   'USDT-ERC20', // Tether on Ethereum (most common stablecoin)
-  'QTC', // XRP (Rank 4, ~$145B market cap)
   if (kDebugMode) 'DOC',
   if (kDebugMode) 'MARTY',
 ];

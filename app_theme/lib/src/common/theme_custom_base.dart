@@ -148,22 +148,22 @@ abstract class ThemeCustomBase {
 class TradingDetailsTheme {
   const TradingDetailsTheme({
     this.swapStatusColors = const [
-      Color.fromRGBO(130, 168, 239, 1),
-      Color.fromRGBO(106, 77, 227, 0.59),
-      Color.fromRGBO(106, 77, 227, 0.59),
-      Color.fromRGBO(34, 121, 241, 0.59),
+      Color.fromRGBO(20, 184, 143, 1),
+      Color.fromRGBO(255, 165, 0, 0.59),  // Changed from purple to orange
+      Color.fromRGBO(255, 165, 0, 0.59),  // Changed from purple to orange
+      Color.fromRGBO(74, 222, 128, 0.59),
     ],
     this.swapFailedStatusColors = const [
       Color.fromRGBO(229, 33, 103, 0.6),
       Color.fromRGBO(226, 22, 169, 0.6)
     ],
     this.swapStepTimerColor = const Color.fromRGBO(162, 175, 187, 1),
-    this.swapStepCircleNormalColor = const Color.fromRGBO(137, 147, 236, 1),
+    this.swapStepCircleNormalColor = const Color.fromRGBO(74, 222, 128, 1),  // Changed from light blue to green
     this.swapStepCircleFailedColor = const Color.fromRGBO(229, 33, 106, 1),
     this.swapStepCircleDisabledColor = const Color.fromRGBO(194, 203, 210, 1),
     this.swapStepTextFailedColor = const Color.fromRGBO(229, 33, 103, 1),
     this.swapStepTextDisabledColor = const Color.fromRGBO(162, 176, 188, 1),
-    this.swapStepTextCurrentColor = const Color.fromRGBO(72, 137, 235, 1),
+    this.swapStepTextCurrentColor = const Color.fromRGBO(20, 184, 143, 1),  // Changed from blue to green
   });
   final List<Color> swapStatusColors;
   final List<Color> swapFailedStatusColors;
@@ -185,7 +185,7 @@ class CoinsManagerTheme {
       blurRadius: 13,
       color: Color.fromRGBO(0, 0, 0, 0.06),
     ),
-    this.filterPopupItemBorderColor = const Color.fromRGBO(136, 146, 235, 1),
+    this.filterPopupItemBorderColor = const Color.fromRGBO(255, 165, 0, 1),  // Changed from purple to orange
     this.listHeaderBorderColor = const Color.fromRGBO(234, 234, 234, 1),
     this.listItemProtocolTextColor = Colors.white,
     this.listItemZeroBalanceColor = const Color.fromRGBO(215, 223, 248, 1),
@@ -200,21 +200,21 @@ class CoinsManagerTheme {
 
 class DexPageTheme {
   const DexPageTheme({
-    this.takerLabelColor = const Color.fromRGBO(47, 179, 239, 1),
-    this.makerLabelColor = const Color.fromRGBO(106, 77, 227, 1),
+    this.takerLabelColor = const Color.fromRGBO(20, 184, 143, 1),  // Changed from light blue to green
+    this.makerLabelColor = const Color.fromRGBO(255, 165, 0, 1),  // Changed from purple to orange
     this.successfulSwapStatusColor = const Color.fromRGBO(73, 212, 162, 1),
     this.failedSwapStatusColor = const Color.fromRGBO(229, 33, 103, 1),
     this.successfulSwapStatusBackgroundColor =
         const Color.fromRGBO(73, 212, 162, 0.12),
-    this.activeOrderFormTabColor = const Color.fromRGBO(89, 107, 231, 1),
+    this.activeOrderFormTabColor = const Color.fromRGBO(74, 222, 128, 1),  // Changed from purple to green
     this.inactiveOrderFormTabColor = const Color.fromRGBO(206, 210, 247, 1),
-    this.takerLabel = const Color.fromRGBO(47, 179, 239, 1),
-    this.makerLabel = const Color.fromRGBO(106, 77, 227, 1),
+    this.takerLabel = const Color.fromRGBO(20, 184, 143, 1),  // Changed from light blue to green
+    this.makerLabel = const Color.fromRGBO(255, 165, 0, 1),  // Changed from purple to orange
     this.successfulSwapStatus = const Color.fromRGBO(73, 212, 162, 1),
     this.failedSwapStatus = const Color.fromRGBO(229, 33, 103, 1),
     this.successfulSwapStatusBackground =
         const Color.fromRGBO(73, 212, 162, 0.12),
-    this.activeOrderFormTab = const Color.fromRGBO(89, 107, 231, 1),
+    this.activeOrderFormTab = const Color.fromRGBO(74, 222, 128, 1),  // Changed from purple to green
     this.inactiveOrderFormTab = const Color.fromRGBO(206, 210, 247, 1),
     this.formPlateGradient = const LinearGradient(
       colors: [
@@ -229,7 +229,7 @@ class DexPageTheme {
     this.frontPlateBorder = const Color.fromRGBO(239, 239, 239, 1),
     this.activeText = const Color.fromRGBO(69, 96, 120, 1),
     this.inactiveText = const Color.fromRGBO(168, 178, 204, 1),
-    this.blueText = const Color.fromRGBO(80, 104, 214, 1),
+    this.blueText = const Color.fromRGBO(74, 222, 128, 1),  // Changed from blue to green
     this.smallButton = const Color.fromRGBO(241, 244, 246, 1),
     this.smallButtonText = const Color.fromRGBO(69, 96, 120, 1),
     this.pagePlateDivider = const Color.fromRGBO(244, 244, 244, 1),

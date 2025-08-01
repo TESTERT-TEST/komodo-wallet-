@@ -2,11 +2,11 @@ import 'package:app_theme/app_theme.dart';
 import 'package:flutter/material.dart';
 
 const ColorSchemeExtension _colorSchemeExtension = ColorSchemeExtension(
-  primary: Color(0xFF00D4FF), // Teal primary
-  p50: Color(0xFF80EAD7), // Light teal
-  p40: Color(0xFFB3F0E0), // Lighter teal
-  p10: Color(0xFFE6F9F5), // Very light teal
-  secondary: Color(0xFF00C3AA), // Teal secondary
+  primary: Color(0xFF14B88F), // Changed from teal (0xFF00D4FF) to rgb(20, 184, 143)
+  p50: Color(0xFF4ADE80),     // Changed from light teal (0xFF80EAD7) to rgb(74, 222, 128)
+  p40: Color(0xFF7AE8A6),     // Changed from lighter teal (0xFFB3F0E0) to lighter green
+  p10: Color(0xFFE6F9F2),     // Changed from very light teal (0xFFE6F9F5) to very light green
+  secondary: Color(0xFF14B88F), // Changed from teal (0xFF00C3AA) to rgb(20, 184, 143)
   s70: Color.fromRGBO(125, 144, 161, 1),
   s50: Color.fromRGBO(162, 175, 187, 1),
   s40: Color.fromRGBO(181, 191, 201, 1),
@@ -28,7 +28,7 @@ const ColorSchemeExtension _colorSchemeExtension = ColorSchemeExtension(
   surfContLowest: Color.fromRGBO(245, 245, 245, 1),
   orange: Color.fromRGBO(237, 170, 70, 1),
   yellow: Color.fromRGBO(230, 188, 65, 1),
-  purple: Color.fromRGBO(123, 73, 221, 1),
+  purple: Color.fromRGBO(255, 165, 0, 1), // Changed from purple to orange
 );
 
 final ColorScheme _colorScheme = theme.global.light.colorScheme.copyWith(
