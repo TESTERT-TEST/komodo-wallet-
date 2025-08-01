@@ -44,7 +44,7 @@ dependencies:
   komodo_cex_market_data:
     # path: sdk/packages/komodo_cex_market_data # Requires symlink to the SDK in the root of the project
     git:
-      url: https://github.com/TESTERT-TEST/komodo-defi-sdk-flutter.git
+      url: https://github.com/KomodoPlatform/komodo-defi-sdk-flutter.git
       path: packages/komodo_cex_market_data
       ref: dev
 
@@ -140,7 +140,7 @@ dependencies:
   komodo_defi_sdk: # TODO: change to pub.dev version?
     # path: sdk/packages/komodo_defi_sdk # Requires symlink to the SDK in the root of the project
     git:
-      url: https://github.com/TESTERT-TEST/komodo-defi-sdk-flutter.git
+      url: https://github.com/KomodoPlatform/komodo-defi-sdk-flutter.git
       path: packages/komodo_defi_sdk
       ref: dev
 
