@@ -665,7 +665,7 @@ packages:
     description:
       path: "packages/komodo_coin_updates"
       ref: dev
-      resolved-ref: "7da7115071c05b240b15280dd62ed52ecfdab75a"
+      resolved-ref: "6a327966ee5c362f3a83571928eb962ab41e6b13"
       url: "https://github.com/TESTERT-TEST/komodo-defi-sdk-flutter.git"
     source: git
     version: "1.0.0"
@@ -674,7 +674,7 @@ packages:
     description:
       path: "packages/komodo_coins"
       ref: dev
-      resolved-ref: "7da7115071c05b240b15280dd62ed52ecfdab75a"
+      resolved-ref: "6a327966ee5c362f3a83571928eb962ab41e6b13"
       url: "https://github.com/TESTERT-TEST/komodo-defi-sdk-flutter.git"
     source: git
     version: "0.3.0+0"
