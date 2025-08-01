@@ -683,7 +683,7 @@ packages:
     description:
       path: "packages/komodo_defi_framework"
       ref: dev
-      resolved-ref: "68429b23dac43eddd53434dda1bd23296523f27d"
+      resolved-ref: "c86e6ad8877bf158a22e21b6090b217e262142e9"
       url: "https://github.com/TESTERT-TEST/komodo-defi-sdk-flutter.git"
     source: git
     version: "0.3.0+0"
