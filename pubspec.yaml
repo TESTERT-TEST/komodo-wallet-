@@ -154,7 +154,7 @@ dependencies:
   komodo_ui:
     # path: sdk/packages/komodo_ui # Requires symlink to the SDK in the root of the project
     git:
-      url: https://github.com/TESTERT-TEST/komodo-defi-sdk-flutter.git
+      url: https://github.com/KomodoPlatform/komodo-defi-sdk-flutter.git
       path: packages/komodo_ui
       ref: dev
   feedback: ^3.1.0
