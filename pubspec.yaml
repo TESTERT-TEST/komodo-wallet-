@@ -44,7 +44,7 @@ dependencies:
   komodo_cex_market_data:
     # path: sdk/packages/komodo_cex_market_data # Requires symlink to the SDK in the root of the project
     git:
-      url: https://github.com/KomodoPlatform/komodo-defi-sdk-flutter.git
+      url: https://github.com/TESTERT-TEST/komodo-defi-sdk-flutter.git
       path: packages/komodo_cex_market_data
       ref: dev
 
@@ -69,7 +69,7 @@ dependencies:
   # Approved via https://github.com/KomodoPlatform/komodo-wallet/pull/1106
   window_size:
     git:
-      url: https://github.com/KomodoPlatform/flutter-desktop-embedding
+      url: https://github.com/TESTERT-TEST/flutter-desktop-embedding
       path: plugins/window_size
       ref: 6c66ad23ee79749f30a8eece542cf54eaf157ed8
 
@@ -140,21 +140,21 @@ dependencies:
   komodo_defi_sdk: # TODO: change to pub.dev version?
     # path: sdk/packages/komodo_defi_sdk # Requires symlink to the SDK in the root of the project
     git:
-      url: https://github.com/KomodoPlatform/komodo-defi-sdk-flutter.git
+      url: https://github.com/TESTERT-TEST/komodo-defi-sdk-flutter.git
       path: packages/komodo_defi_sdk
       ref: dev
 
   komodo_defi_types:
     # path: sdk/packages/komodo_defi_types # Requires symlink to the SDK in the root of the project
     git:
-      url: https://github.com/KomodoPlatform/komodo-defi-sdk-flutter.git
+      url: https://github.com/TESTERT-TEST/komodo-defi-sdk-flutter.git
       path: packages/komodo_defi_types
       ref: dev
 
   komodo_ui:
     # path: sdk/packages/komodo_ui # Requires symlink to the SDK in the root of the project
     git:
-      url: https://github.com/KomodoPlatform/komodo-defi-sdk-flutter.git
+      url: https://github.com/TESTERT-TEST/komodo-defi-sdk-flutter.git
       path: packages/komodo_ui
       ref: dev
   feedback: ^3.1.0
