@@ -161,7 +161,7 @@ abstract class BaseFiatProvider {
     // These exist in coin config but not in CoinType structure yet:
     // ARBITRUM
 
-    // These chain IDs are not supported yet by QuBitcoin Wallet:
+    // These chain IDs are not supported yet by Qubitcoin Komodo Wallet:
     // ADA / CARDANO
     // AVAX-X
     // ALGO
@@ -260,16 +260,16 @@ abstract class BaseFiatProvider {
   }
 
   /// Provides the URL to the checkout handler HTML page that posts the payment
-  /// status received from the fiat provider to the QuBitcoin Wallet app. The
+  /// status received from the fiat provider to the Qubitcoin Komodo Wallet app. The
   /// `window.opener.postMessage` function is used for this purpose, and should
-  /// be handled by the QuBitcoin Wallet app.
+  /// be handled by the Qubitcoin Komodo Wallet app.
   static String checkoutCallbackUrl() {
     const pagePath = 'assets/assets/web_pages/checkout_status_redirect.html';
     return '${getOriginUrl()}/$pagePath';
   }
 
   /// Provides the URL to the checkout handler HTML page that posts the payment
-  /// status received from the fiat provider to the QuBitcoin Wallet app.
+  /// status received from the fiat provider to the Qubitcoin Komodo Wallet app.
   static String successUrl(String accountReference) {
     final baseUrl = checkoutCallbackUrl();
 

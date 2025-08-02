@@ -1,10 +1,10 @@
 # SDK Dependency Management
 
-This document describes how to manage SDK dependencies in the QuBitcoin Wallet project.
+This document describes how to manage SDK dependencies in the Qubitcoin Komodo Wallet project.
 
 ## SDK Dependencies
 
-The QuBitcoin Wallet relies on several SDK packages maintained in the [komodo-defi-sdk-flutter](https://github.com/KomodoPlatform/komodo-defi-sdk-flutter) repository. These packages include:
+The Qubitcoin Komodo Wallet relies on several SDK packages maintained in the [komodo-defi-sdk-flutter](https://github.com/KomodoPlatform/komodo-defi-sdk-flutter) repository. These packages include:
 
 - `komodo_cex_market_data`
 - `komodo_defi_sdk`

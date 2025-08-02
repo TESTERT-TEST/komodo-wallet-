@@ -90,12 +90,12 @@ BEGIN
         BLOCK "040904e4"
         BEGIN
             VALUE "CompanyName", "qubitcoin" "\0"
-            VALUE "FileDescription", "QuBitcoin Wallet" "\0"
+            VALUE "FileDescription", "Qubitcoin Komodo Wallet" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
             VALUE "InternalName", "qubitcoinwallet" "\0"
             VALUE "LegalCopyright", "Copyright (C) 2025 qubitcoin. All rights reserved." "\0"
             VALUE "OriginalFilename", "qubitcoinwallet.exe" "\0"
-            VALUE "ProductName", "QuBitcoin Wallet" "\0"
+            VALUE "ProductName", "Qubitcoin Komodo Wallet" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"
         END
     END

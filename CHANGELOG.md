@@ -1,4 +1,4 @@
-# QuBitcoin Wallet v0.9.1 Release Notes
+# Qubitcoin Komodo Wallet v0.9.1 Release Notes
 
 This is a hotfix release that addresses critical issues with Trezor hardware wallet login functionality.
 
@@ -10,9 +10,9 @@ This is a hotfix release that addresses critical issues with Trezor hardware wal
 
 ---
 
-# QuBitcoin Wallet v0.9.0 Release Notes
+# Qubitcoin Komodo Wallet v0.9.0 Release Notes
 
-We are excited to announce QuBitcoin Wallet v0.9.0. This release introduces HD wallet functionality, cross-platform fiat on-ramp improvements, a new feedback provider, and numerous bug fixes and dependency upgrades.
+We are excited to announce Qubitcoin Komodo Wallet v0.9.0. This release introduces HD wallet functionality, cross-platform fiat on-ramp improvements, a new feedback provider, and numerous bug fixes and dependency upgrades.
 
 Under the hood, the app has undergone a major rewrite to migrate to our new KDF Flutter SDK. This also allows developers to quickly and easily build their own DeFi applications in a matter of hours instead of months. See the [SDK package](https://github.com/KomodoPlatform/komodo-defi-sdk-flutter) for more information.
 

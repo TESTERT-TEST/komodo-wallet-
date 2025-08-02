@@ -1,8 +1,8 @@
-# Build Security Advisory for QuBitcoin Wallet
+# Build Security Advisory for Qubitcoin Komodo Wallet
 
 ## Critical Flags for Production Builds
 
-When building the QuBitcoin Wallet for production, **always** use the following flags:
+When building the Qubitcoin Komodo Wallet for production, **always** use the following flags:
 
 ```bash
 --enforce-lockfile  # When running 'flutter pub get'
