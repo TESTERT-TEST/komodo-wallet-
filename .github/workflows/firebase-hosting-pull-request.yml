@@ -1,6 +1,5 @@
-# Deploys a preview build to Firebase Hosting when a pull request is opened, synchronized, or reopened
-name: Deploy to Firebase Hosting on PR
-run-name: ${{ github.actor }} is deploying a preview build to Firebase Hosting 🚀
+name: Build Web Preview on PR
+run-name: ${{ github.actor }} is building web preview 🛠️
 
 on:
   pull_request:
@@ -11,7 +10,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  build_and_preview:
+  build_and_upload:
     if: ${{ github.event.pull_request.head.repo.full_name == github.repository || github.event_name == 'workflow_dispatch' }}
     runs-on: ubuntu-latest
 
@@ -21,54 +20,46 @@ jobs:
         run: echo "sha_short=$(echo ${GITHUB_SHA::7})" >> $GITHUB_OUTPUT
         id: shortify_commit
 
-      - name: Get branch
+      - name: Get branch name
         shell: bash
-        run: echo "ref_short=$(echo ${GITHUB_REF##*/})" >> $GITHUB_OUTPUT
-        id: get_branch
+        run: echo "branch_name=${GITHUB_REF#refs/heads/}" >> $GITHUB_OUTPUT
+        id: get_branch_name
 
-      - name: Get Preview Channel ID
-        shell: bash
-        run: echo "preview_channel_id=$(echo ${GITHUB_REF#*/})" >> $GITHUB_OUTPUT
-        id: get_preview_channel_id
-
-      - name: Setup GH Actions
+      - name: Checkout repository
         uses: actions/checkout@v4
 
       - name: Install Flutter and dependencies
         uses: ./.github/actions/flutter-deps
 
-      - name: Fetch packages and generate assets
+      - name: Generate build assets
         uses: ./.github/actions/generate-assets
         with:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          # Optionally provide feedback service configuration if available
-          FEEDBACK_API_KEY: ${{ secrets.FEEDBACK_API_KEY }}
-          FEEDBACK_PRODUCTION_URL: ${{ secrets.FEEDBACK_PRODUCTION_URL }}
-          FEEDBACK_TEST_URL: ${{ secrets.FEEDBACK_TEST_URL }}
-          TRELLO_API_KEY: ${{ secrets.TRELLO_API_KEY }}
-          TRELLO_TOKEN: ${{ secrets.TRELLO_TOKEN }}
-          TRELLO_BOARD_ID: ${{ secrets.TRELLO_BOARD_ID }}
-          TRELLO_LIST_ID: ${{ secrets.TRELLO_LIST_ID }}
+          BUILD_COMMAND: "flutter build web --no-pub --release"
+          FEEDBACK_API_KEY: ${{ secrets.FEEDBACK_API_KEY || '' }}
+          FEEDBACK_PRODUCTION_URL: ${{ secrets.FEEDBACK_PRODUCTION_URL || '' }}
+          FEEDBACK_TEST_URL: ${{ secrets.FEEDBACK_TEST_URL || '' }}
+          TRELLO_API_KEY: ${{ secrets.TRELLO_API_KEY || '' }}
+          TRELLO_TOKEN: ${{ secrets.TRELLO_TOKEN || '' }}
+          TRELLO_BOARD_ID: ${{ secrets.TRELLO_BOARD_ID || '' }}
+          TRELLO_LIST_ID: ${{ secrets.TRELLO_LIST_ID || '' }}
 
       - name: Validate build
-        uses: ./.github/actions/validate-build
+        run: |
+          ls -la build/web/
+          [ -f build/web/index.html ] || exit 1
 
-      - name: Deploy Qubitcoin Komodo Wallet web feature preview (Expires in 7 days)
-        uses: FirebaseExtended/action-hosting-deploy@v0.7.1
+      - name: Upload web build artifact
+        uses: actions/upload-artifact@v4
         with:
-          repoToken: "${{ secrets.GITHUB_TOKEN }}"
-          firebaseServiceAccount: "${{ secrets.FIREBASE_SERVICE_ACCOUNT_KOMODO_WALLET_OFFICIAL }}"
-          channelId: "${{ steps.get_preview_channel_id.outputs.preview_channel_id }}"
-          target: walletrc
-          expires: 7d
-          projectId: komodo-wallet-official
+          name: web-preview-${{ steps.get_branch_name.outputs.branch_name }}-${{ steps.shortify_commit.outputs.sha_short }}
+          path: build/web/
+          retention-days: 7
 
-      - name: Deploy Qubitcoin Komodo Wallet Web dev preview (`dev` branch)
-        if: github.ref == 'refs/heads/dev' && github.event_name != 'workflow_dispatch'
-        uses: FirebaseExtended/action-hosting-deploy@v0.7.1
+      - name: Upload debug symbols
+        if: always()
+        uses: actions/upload-artifact@v4
         with:
-          repoToken: "${{ secrets.GITHUB_TOKEN }}"
-          firebaseServiceAccount: "${{ secrets.FIREBASE_SERVICE_ACCOUNT_KOMODO_WALLET_OFFICIAL }}"
-          channelId: dev-preview
-          target: walletrc
-          projectId: komodo-wallet-official
+          name: debug-symbols-${{ steps.get_branch_name.outputs.branch_name }}-${{ steps.shortify_commit.outputs.sha_short }}
+          path: build/web/**/*.symbols
+          retention-days: 7
