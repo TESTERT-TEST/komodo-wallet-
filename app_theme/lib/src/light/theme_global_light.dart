@@ -58,6 +58,7 @@ ThemeData get themeGlobalLight {
         elevation: 12.0,
         shape: const RoundedRectangleBorder(
           borderRadius: BorderRadius.all(Radius.circular(12)),
+		  ),
         behavior: SnackBarBehavior.floating,
         backgroundColor: colorScheme.primaryContainer,
         contentTextStyle: textTheme.bodyLarge!.copyWith(
