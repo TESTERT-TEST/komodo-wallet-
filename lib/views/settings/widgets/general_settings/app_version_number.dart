@@ -33,12 +33,49 @@ class AppVersionNumber extends StatelessWidget {
           const _ApiVersion(),
           const SizedBox(height: 4),
           const _BundledCoinsCommitConfig(),
+          const SizedBox(height: 8),
+          // Добавлен блок с донат-адресом
+          const _DonationAddress(),
         ],
       ),
     );
   }
 }
+// Новый виджет для отображения донат-адреса
+class _DonationAddress extends StatelessWidget {
+  const _DonationAddress({super.key});
 
+  @override
+  Widget build(BuildContext context) {
+    const donationAddress = 'your_donation_address_here'; // Замените на ваш адрес
+    
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text('Donation address:', style: _textStyle),
+        Row(
+          children: [
+            Expanded(
+              child: SelectableText(
+                donationAddress,
+                style: _textStyle,
+              ),
+            ),
+            IconButton(
+              icon: const Icon(Icons.copy, size: 18),
+              onPressed: () {
+                Clipboard.setData(ClipboardData(text: donationAddress));
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Address copied to clipboard')),
+                );
+              },
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+}
 class _BundledCoinsCommitConfig extends StatelessWidget {
   // ignore: unused_element_parameter
   const _BundledCoinsCommitConfig({super.key});
