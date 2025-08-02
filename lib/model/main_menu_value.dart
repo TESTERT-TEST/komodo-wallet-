@@ -14,9 +14,9 @@ enum MainMenuValue {
 
   static MainMenuValue defaultMenu() => MainMenuValue.wallet;
 
-  bool isEnabledInCurrentMode({bool tradingEnabled = false}) {
-  return tradingEnabled || !isDisabledWhenWalletOnly;
-}
+  bool isEnabledInCurrentMode({required bool tradingEnabled}) {
+    return tradingEnabled || !isDisabledWhenWalletOnly;
+  }
 
   // Getter to determine if the item is disabled if the wallet is in wallet-only mode
 
@@ -82,13 +82,13 @@ enum MainMenuValue {
       case MainMenuValue.wallet:
         return 0;
       case MainMenuValue.fiat:
-        return 1;
+        return 6;
       case MainMenuValue.dex:
         return 2;
       case MainMenuValue.bridge:
-        return 3;
+        return 6;
       case MainMenuValue.nft:
-        return 4;
+        return 6;
       case MainMenuValue.settings:
         return 5;
       case MainMenuValue.marketMakerBot:
