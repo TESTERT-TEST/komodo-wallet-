@@ -142,7 +142,7 @@ class ThemeCustomDark extends ThemeExtension<ThemeCustomDark>
     formPlateGradient: LinearGradient(
       colors: [
         Color.fromRGBO(20, 184, 143, 1), // Changed to rgb(20, 184, 143)
-        Color(0xFFFFA500), // Changed to orange
+        Color.fromRGBO(225, 165, 0, 1),
       ],
       begin: Alignment.topLeft,
       end: Alignment.bottomRight,

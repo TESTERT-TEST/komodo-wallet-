@@ -181,7 +181,7 @@ ThemeData get themeGlobalLight {
     segmentedButtonTheme: SegmentedButtonThemeData(
       style: SegmentedButton.styleFrom(
         backgroundColor: const Color.fromRGBO(243, 245, 246, 1),
-        surfaceTintColor: const Color(0xFFFFA500), // Changed from purple to orange
+        surfaceTintColor: Colors.purple,
         selectedBackgroundColor: colorScheme.primary,
         foregroundColor: textColor.withAlpha(179),
         selectedForegroundColor: Colors.white,
