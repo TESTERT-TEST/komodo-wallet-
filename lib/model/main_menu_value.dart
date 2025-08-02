@@ -22,16 +22,14 @@ enum MainMenuValue {
 
   bool get isDisabledWhenWalletOnly {
     switch (this) {
-      case MainMenuValue.dex:
+      
       case MainMenuValue.bridge:
-        return true;
       case MainMenuValue.marketMakerBot:
-        return true;
-      case MainMenuValue.wallet:
       case MainMenuValue.fiat:
-        return true;
       case MainMenuValue.nft:
         return true;
+      case MainMenuValue.wallet:
+      case MainMenuValue.dex:
       case MainMenuValue.settings:
       case MainMenuValue.support:
         return false;
