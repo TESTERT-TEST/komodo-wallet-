@@ -15,14 +15,24 @@ enum MainMenuValue {
   static MainMenuValue defaultMenu() => MainMenuValue.wallet;
 
   bool isEnabledInCurrentMode({required bool tradingEnabled}) {
+    if (isPermanentlyDisabled) return false;
     return tradingEnabled || !isDisabledWhenWalletOnly;
   }
 
-  // Getter to determine if the item is disabled if the wallet is in wallet-only mode
+  bool get isPermanentlyDisabled {
+    switch (this) {
+      case MainMenuValue.bridge:
+      case MainMenuValue.nft:
+      case MainMenuValue.fiat:
+      case MainMenuValue.marketMakerBot:
+        return true; // Эти пункты всегда отключены
+      default:
+        return false;
+    }
+  }
 
   bool get isDisabledWhenWalletOnly {
     switch (this) {
-      
       case MainMenuValue.bridge:
       case MainMenuValue.marketMakerBot:
       case MainMenuValue.fiat:
