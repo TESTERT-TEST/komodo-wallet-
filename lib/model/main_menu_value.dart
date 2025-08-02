@@ -82,13 +82,13 @@ enum MainMenuValue {
       case MainMenuValue.wallet:
         return 0;
       case MainMenuValue.fiat:
-        return 6;
+        return 1;
       case MainMenuValue.dex:
         return 2;
       case MainMenuValue.bridge:
-        return 6;
+        return 3;
       case MainMenuValue.nft:
-        return 6;
+        return 4;
       case MainMenuValue.settings:
         return 5;
       case MainMenuValue.marketMakerBot:

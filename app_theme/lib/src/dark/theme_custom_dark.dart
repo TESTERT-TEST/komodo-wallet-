@@ -111,7 +111,7 @@ class ThemeCustomDark extends ThemeExtension<ThemeCustomDark>
   final Color defaultBorderButtonBorder = const Color(0xFF4ADE80); // Changed from teal to green (rgb(74, 222, 128))
   @override
   final Color defaultBorderButtonBackground =
-      const Color.fromRGBO(22, 25, 39, 1);
+      const Color.fromRGBO(13, 54, 6, 1);
   @override
   final Color successColor = const Color.fromRGBO(0, 192, 88, 1);
   @override
@@ -151,7 +151,7 @@ class ThemeCustomDark extends ThemeExtension<ThemeCustomDark>
     activeText: Colors.white,
     inactiveText: Color.fromRGBO(123, 131, 152, 1),
     blueText: Color.fromRGBO(74, 222, 128, 1), // Changed from blue to green (rgb(74, 222, 128))
-    smallButton: Color.fromRGBO(35, 45, 72, 1),
+    smallButton: Color.fromRGBO(35, 72, 39, 1),
     smallButtonText: Color.fromRGBO(141, 150, 167, 1),
     pagePlateDivider: Color.fromRGBO(32, 37, 63, 1),
     coinPlateDivider: Color.fromRGBO(44, 51, 81, 1),
@@ -209,7 +209,7 @@ class ThemeCustomDark extends ThemeExtension<ThemeCustomDark>
   final Color searchFieldMobile = const Color.fromRGBO(42, 47, 62, 1);
   @override
   final Color walletEditButtonsBackgroundColor =
-      const Color.fromRGBO(29, 33, 53, 1);
+      const Color.fromRGBO(29, 53, 33, 1);
   @override
   final Color swapButtonColor = const Color.fromRGBO(20, 184, 143, 1); // Changed from blue to green (rgb(20, 184, 143))
   @override
