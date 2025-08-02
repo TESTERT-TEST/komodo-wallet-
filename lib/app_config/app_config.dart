@@ -10,7 +10,7 @@ const double mainLayoutPadding = 29;
 const double appBarHeight = 70;
 const int scaleOnInfinitePrecision = 20; // ETH has 18 decimals, so use more
 const String allWalletsStorageKey = 'all-wallets';
-const String defaultDexCoin = 'KMD';
+const String defaultDexCoin = 'QTC';
 const String trezorWalletNamePrefix = 'my trezor';
 const List<Locale> localeList = [Locale('en')];
 const String assetsPath = 'assets';
@@ -19,7 +19,7 @@ const String coinsAssetsPath = 'packages/komodo_defi_framework/assets';
 final Uri discordSupportChannelUrl = Uri.parse(
   'https://discord.com/channels/412898016371015680/429676282196787200',
 );
-final Uri discordInviteUrl = Uri.parse('https://komodoplatform.com/discord');
+final Uri discordInviteUrl = Uri.parse('https://discord.gg/PyBKF62Dc6');
 
 /// Const to define if Bitrefill integration is enabled in the app.
 const bool isBitrefillIntegrationEnabled = false;
@@ -164,13 +164,6 @@ const List<String> appWalletOnlyAssetList = [
 /// This will not affect existing wallets.
 List<String> get enabledByDefaultCoins => [
   'QTC', // QTC (Rank 40, ~$1.4M market cap)
-  'KMD', // Always included (Komodo ecosystem)
-  'BTC-segwit', // Bitcoin (Rank 1, ~$2.21T market cap)
-  'ETH', // Ethereum (Rank 2, ~$335B market cap)
-  'BNB', // Binance Coin (Rank 5, ~$93B market cap)
-  'DOGE', // Dogecoin (Rank 9, ~$27.1B market cap)
-  'LTC-segwit', // Litecoin (popular, has segwit support)
-  'USDT-ERC20', // Tether on Ethereum (most common stablecoin)
   if (kDebugMode) 'DOC',
   if (kDebugMode) 'MARTY',
 ];
