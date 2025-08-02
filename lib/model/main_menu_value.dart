@@ -14,9 +14,9 @@ enum MainMenuValue {
 
   static MainMenuValue defaultMenu() => MainMenuValue.wallet;
 
-  bool isEnabledInCurrentMode({required bool tradingEnabled}) {
-    return tradingEnabled || !isDisabledWhenWalletOnly;
-  }
+  bool isEnabledInCurrentMode({bool tradingEnabled = false}) {
+  return tradingEnabled || !isDisabledWhenWalletOnly;
+}
 
   // Getter to determine if the item is disabled if the wallet is in wallet-only mode
 
