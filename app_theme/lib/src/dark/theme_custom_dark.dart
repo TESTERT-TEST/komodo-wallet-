@@ -26,13 +26,13 @@ class ThemeCustomDark extends ThemeExtension<ThemeCustomDark>
   }
 
   @override
-  final Color mainMenuItemColor = const Color.fromRGBO(173, 175, 198, 1);
+  final Color mainMenuItemColor = const Color.fromRGBO(173, 198, 175, 1); // зелено-серый
   @override
   final Color mainMenuSelectedItemColor = Colors.white;
   @override
   final Color checkCheckboxColor = Colors.white;
   @override
-  final Color borderCheckboxColor = const Color.fromRGBO(62, 70, 99, 1);
+  final Color borderCheckboxColor = const Color.fromRGBO(62, 99, 70, 1); // тёмно-зелёный
   @override
   final TextStyle tradingFormDetailsLabel = const TextStyle(
     fontSize: 14,
@@ -45,7 +45,7 @@ class ThemeCustomDark extends ThemeExtension<ThemeCustomDark>
     color: Color.fromRGBO(74, 222, 128, 1),
   );
   @override
-  final Color fiatAmountColor = const Color.fromRGBO(168, 177, 185, 1);
+  final Color fiatAmountColor = const Color.fromRGBO(168, 185, 177, 1);
   @override
   final Color headerFloatBoxColor = const Color.fromRGBO(20, 184, 143, 1);
   @override
@@ -134,9 +134,9 @@ class ThemeCustomDark extends ThemeExtension<ThemeCustomDark>
   @override
   final DexPageTheme dexPageTheme = const DexPageTheme(
     activeOrderFormTabColor: Color.fromRGBO(255, 255, 255, 1),
-    inactiveOrderFormTabColor: Color.fromRGBO(152, 155, 182, 1),
+    inactiveOrderFormTabColor: Color.fromRGBO(152, 182, 155, 1), // заменён на зелёный
     activeOrderFormTab: Color.fromRGBO(255, 255, 255, 1),
-    inactiveOrderFormTab: Color.fromRGBO(152, 155, 182, 1),
+    inactiveOrderFormTab: Color.fromRGBO(152, 182, 155, 1),
     formPlateGradient: LinearGradient(
       colors: [
         Color.fromRGBO(20, 184, 143, 1),
@@ -145,20 +145,20 @@ class ThemeCustomDark extends ThemeExtension<ThemeCustomDark>
       begin: Alignment.topLeft,
       end: Alignment.bottomRight,
     ),
-    frontPlate: Color.fromRGBO(32, 35, 55, 1),
-    frontPlateInner: Color.fromRGBO(21, 25, 33, 1),
-    frontPlateBorder: Color.fromRGBO(43, 49, 87, 1),
+    frontPlate: Color.fromRGBO(32, 55, 35, 1),
+    frontPlateInner: Color.fromRGBO(21, 33, 25, 1),
+    frontPlateBorder: Color.fromRGBO(43, 87, 49, 1),
     activeText: Colors.white,
-    inactiveText: Color.fromRGBO(123, 131, 152, 1),
+    inactiveText: Color.fromRGBO(123, 152, 131, 1),
     blueText: Color.fromRGBO(74, 222, 128, 1),
     smallButton: Color.fromRGBO(35, 72, 39, 1),
-    smallButtonText: Color.fromRGBO(141, 150, 167, 1),
-    pagePlateDivider: Color.fromRGBO(32, 37, 63, 1),
-    coinPlateDivider: Color.fromRGBO(44, 51, 81, 1),
-    formPlateDivider: Color.fromRGBO(48, 57, 96, 1),
-    emptyPlace: Color.fromRGBO(40, 44, 69, 1),
-    tokenName: Color.fromRGBO(69, 96, 120, 1),
-    expandMore: Color.fromRGBO(153, 168, 181, 1),
+    smallButtonText: Color.fromRGBO(141, 167, 150, 1),
+    pagePlateDivider: Color.fromRGBO(32, 63, 37, 1),
+    coinPlateDivider: Color.fromRGBO(44, 81, 51, 1),
+    formPlateDivider: Color.fromRGBO(48, 96, 57, 1),
+    emptyPlace: Color.fromRGBO(40, 69, 44, 1),
+    tokenName: Color.fromRGBO(69, 120, 96, 1),
+    expandMore: Color.fromRGBO(153, 181, 168, 1),
   );
   @override
   final Color asksColor = const Color(0xffe52167);
@@ -171,43 +171,43 @@ class ThemeCustomDark extends ThemeExtension<ThemeCustomDark>
   @override
   final double dexInputWidth = 320;
   @override
-  final Color specificButtonBorderColor = const Color.fromRGBO(38, 40, 52, 1);
+  final Color specificButtonBorderColor = const Color.fromRGBO(38, 52, 40, 1);
   @override
   final Color specificButtonBackgroundColor = const Color(0xFF141414);
   @override
   final Color balanceColor = const Color.fromRGBO(74, 222, 128, 1);
   @override
-  final Color subBalanceColor = const Color.fromRGBO(124, 136, 171, 1);
+  final Color subBalanceColor = const Color.fromRGBO(124, 171, 136, 1);
   @override
   final Color subCardBackgroundColor = const Color(0xFF0F0F0F);
   @override
   final Color lightButtonColor = const Color.fromRGBO(20, 184, 143, 0.12);
   @override
-  final Color filterItemBorderColor = const Color.fromRGBO(52, 56, 77, 1);
+  final Color filterItemBorderColor = const Color.fromRGBO(52, 77, 56, 1);
   @override
   final Color warningColor = const Color.fromRGBO(229, 33, 103, 1);
   @override
-  final Color progressBarColor = const Color.fromRGBO(69, 96, 120, 0.33);
+  final Color progressBarColor = const Color.fromRGBO(69, 120, 96, 0.33);
   @override
-  final Color progressBarPassedColor =
-      const Color.fromRGBO(74, 222, 128, 1);
+  final Color progressBarPassedColor = const Color.fromRGBO(74, 222, 128, 1);
   @override
   final Color progressBarNotPassedColor =
-      const Color.fromRGBO(194, 203, 210, 1);
+      const Color.fromRGBO(194, 210, 203, 1);
   @override
   final Color dexSubTitleColor = const Color.fromRGBO(255, 255, 255, 1);
   @override
   final Color selectedMenuBackgroundColor =
-      const Color.fromRGBO(46, 52, 112, 1);
+      const Color.fromRGBO(46, 112, 52, 1);
   @override
   final Color tabBarShadowColor = const Color.fromRGBO(255, 255, 255, 0.08);
   @override
-  final Color smartchainLabelBorderColor = const Color.fromRGBO(32, 22, 49, 1);
+  final Color smartchainLabelBorderColor =
+      const Color.fromRGBO(32, 49, 22, 1);
   @override
   final Color mainMenuSelectedItemBackgroundColor =
       const Color.fromRGBO(20, 184, 143, 0.12);
   @override
-  final Color searchFieldMobile = const Color.fromRGBO(42, 47, 62, 1);
+  final Color searchFieldMobile = const Color.fromRGBO(42, 62, 47, 1);
   @override
   final Color walletEditButtonsBackgroundColor =
       const Color.fromRGBO(29, 53, 33, 1);
@@ -219,9 +219,9 @@ class ThemeCustomDark extends ThemeExtension<ThemeCustomDark>
   @override
   final Color keyPadColor = const Color(0xFF000000);
   @override
-  final Color keyPadTextColor = const Color.fromRGBO(129, 151, 182, 1);
+  final Color keyPadTextColor = const Color.fromRGBO(129, 182, 151, 1);
   @override
-  final Color dexCoinProtocolColor = const Color.fromRGBO(168, 177, 185, 1);
+  final Color dexCoinProtocolColor = const Color.fromRGBO(168, 185, 177, 1);
   @override
   final Color dialogBarrierColor = const Color.fromRGBO(3, 26, 43, 0.36);
   @override
