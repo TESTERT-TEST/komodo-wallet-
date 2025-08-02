@@ -34,25 +34,24 @@ class AppVersionNumber extends StatelessWidget {
           const SizedBox(height: 4),
           const _BundledCoinsCommitConfig(),
           const SizedBox(height: 8),
-          // Добавлен блок с донат-адресом
           const _DonationAddress(),
         ],
       ),
     );
   }
 }
-// Новый виджет для отображения донат-адреса
+
 class _DonationAddress extends StatelessWidget {
   const _DonationAddress({super.key});
 
   @override
   Widget build(BuildContext context) {
-    const donationAddress = 'your_donation_address_here'; // Замените на ваш адрес
+    const donationAddress = 'bc1qd627zqjw2llxjjjj7ws3arz7ky2v9erldaa5vq';
     
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Donation address:', style: _textStyle),
+        Text('Donation address QTC:', style: _textStyle),
         Row(
           children: [
             Expanded(
