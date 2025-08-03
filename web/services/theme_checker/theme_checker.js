@@ -6,7 +6,7 @@
         if (loading != null) { loading.classList.add('loading_dark'); }
     }
     const lightBackgroundColor = '#f5f5f5';
-    const darkBackgroundColor = '#121420';
+    const darkBackgroundColor = '#122119';
     const ultraDarkBackgroundColor = '#000000';
     const headTag = document.querySelector('head');
     const lightThemeColorMetaTag = document.createElement('meta');
