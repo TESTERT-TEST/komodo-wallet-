@@ -7,9 +7,6 @@ name: Roll SDK Packages
 # https://github.com/KomodoPlatform/komodo-wallet/blob/dev/docs/SDK_DEPENDENCY_MANAGEMENT.md
 
 on:
-  schedule:
-    # Run once a day at midnight
-    - cron: "0 0 * * *"
   push:
     branches:
       - dev
